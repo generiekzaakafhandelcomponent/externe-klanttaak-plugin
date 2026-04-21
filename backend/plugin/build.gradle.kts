@@ -29,27 +29,27 @@ dockerCompose {
 }
 
 dependencies {
-    implementation("com.ritense.valtimo:catalogi-api")
-    implementation("com.ritense.valtimo:contract")
-    implementation("com.ritense.valtimo:core")
-    implementation("com.ritense.valtimo:case")
-    implementation("com.ritense.valtimo:documenten-api")
-    implementation("com.ritense.valtimo:outbox")
-    implementation("com.ritense.valtimo:object-management")
-    implementation("com.ritense.valtimo:objecten-api")
-    implementation("com.ritense.valtimo:objecttypen-api")
-    implementation("com.ritense.valtimo:openzaak-plugin-authentication")
-    implementation("com.ritense.valtimo:notificaties-api")
-    implementation("com.ritense.valtimo:plugin")
-    implementation("com.ritense.valtimo:process-document")
-    implementation("com.ritense.valtimo:value-resolver")
-    implementation("com.ritense.valtimo:zaken-api")
+    compileOnly("com.ritense.valtimo:catalogi-api")
+    compileOnly("com.ritense.valtimo:contract")
+    compileOnly("com.ritense.valtimo:core")
+    compileOnly("com.ritense.valtimo:case")
+    compileOnly("com.ritense.valtimo:documenten-api")
+    compileOnly("com.ritense.valtimo:outbox")
+    compileOnly("com.ritense.valtimo:object-management")
+    compileOnly("com.ritense.valtimo:objecten-api")
+    compileOnly("com.ritense.valtimo:objecttypen-api")
+    compileOnly("com.ritense.valtimo:openzaak-plugin-authentication")
+    compileOnly("com.ritense.valtimo:notificaties-api")
+    compileOnly("com.ritense.valtimo:plugin")
+    compileOnly("com.ritense.valtimo:process-document")
+    compileOnly("com.ritense.valtimo:value-resolver")
+    compileOnly("com.ritense.valtimo:zaken-api")
 
-    implementation(kotlin("reflect"))
+    compileOnly(kotlin("reflect"))
 
-    implementation("org.springframework.boot:spring-boot-starter-security")
+    compileOnly("org.springframework.boot:spring-boot-starter-security")
 
-    implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
+    compileOnly("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 
     // Testing
     testImplementation("com.ritense.valtimo:local-resource")
