@@ -42,7 +42,7 @@ import com.ritense.objectmanagement.service.ObjectManagementService
 import com.ritense.objecttypenapi.ObjecttypenApiPlugin
 import com.ritense.plugin.service.PluginService
 import com.ritense.valtimo.contract.json.MapperSingleton
-import com.ritense.valtimo.service.CamundaTaskService
+import com.ritense.valtimo.service.OperatonTaskService
 import com.ritense.valueresolver.ValueResolverService
 import org.camunda.community.mockito.delegate.DelegateExecutionFake
 import org.camunda.community.mockito.delegate.DelegateTaskFake
@@ -72,7 +72,7 @@ internal class ExterneKlanttaakServiceTest {
     private lateinit var objectenApiPlugin: ObjectenApiPlugin
     private lateinit var objecttypenApiPlugin: ObjecttypenApiPlugin
     private lateinit var valueResolverService: ValueResolverService
-    private lateinit var taskService: CamundaTaskService
+    private lateinit var taskService: OperatonTaskService
     private lateinit var objectManagement: ObjectManagement
     private lateinit var externeKlanttaakVersion: IExterneKlanttaakVersion
 

@@ -19,7 +19,7 @@ package com.ritense
 import com.ritense.authorization.specification.impl.NoopAuthorizationSpecificationFactory
 import com.ritense.catalogiapi.service.ZaaktypeUrlProvider
 import com.ritense.resource.service.ResourceService
-import com.ritense.valtimo.camunda.domain.CamundaTask
+import com.ritense.valtimo.operaton.domain.OperatonTask
 import com.ritense.valtimo.contract.authentication.UserManagementService
 import com.ritense.valtimo.contract.mail.MailSender
 import com.ritense.zakenapi.ResourceProvider
@@ -51,5 +51,5 @@ abstract class BaseIntegrationTest {
     lateinit var zaaktypeUrlProvider: ZaaktypeUrlProvider
 
     @Autowired
-    lateinit var noopAuthorizationSpecificationFactory: NoopAuthorizationSpecificationFactory<CamundaTask>
+    lateinit var noopAuthorizationSpecificationFactory: NoopAuthorizationSpecificationFactory<OperatonTask>
 }

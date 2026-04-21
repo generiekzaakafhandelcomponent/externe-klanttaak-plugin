@@ -20,9 +20,9 @@ import com.ritense.plugin.domain.PluginConfiguration
 import com.ritense.plugin.domain.PluginConfigurationId
 import com.ritense.plugin.service.PluginService
 import com.ritense.processdocument.service.ProcessDocumentService
-import com.ritense.valtimo.camunda.domain.CamundaTask
-import com.ritense.valtimo.service.CamundaProcessService
-import com.ritense.valtimo.service.CamundaTaskService
+import com.ritense.valtimo.operaton.domain.OperatonTask
+import com.ritense.valtimo.service.OperatonProcessService
+import com.ritense.valtimo.service.OperatonTaskService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -38,16 +38,16 @@ class ExterneKlanttaakEventListenerTest {
     private lateinit var externeklanttaakEventListener: ExterneKlanttaakEventListener
     private lateinit var objectManagementService: ObjectManagementService
     private lateinit var pluginService: PluginService
-    private lateinit var taskService: CamundaTaskService
+    private lateinit var taskService: OperatonTaskService
     private lateinit var processDocumentService: ProcessDocumentService
-    private lateinit var processService: CamundaProcessService
+    private lateinit var processService: OperatonProcessService
     private lateinit var objectManagement: ObjectManagement
     private lateinit var externeKlanttaakPluginConfig: PluginConfiguration
     private lateinit var objectenApiPlugin: ObjectenApiPlugin
     private lateinit var objecttypenApiPlugin: ObjecttypenApiPlugin
     private lateinit var externeKlanttaakPlugin: ExterneKlanttaakPlugin
     private lateinit var externeKlanttaakService: ExterneKlanttaakService
-    private lateinit var camundaTask: CamundaTask
+    private lateinit var camundaTask: OperatonTask
 
     @BeforeEach
     fun setUp() {
