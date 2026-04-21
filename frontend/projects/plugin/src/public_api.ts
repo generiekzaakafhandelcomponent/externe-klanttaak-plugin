@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 Ritense BV, the Netherlands.
+ * Copyright 2015-2022 Ritense BV, the Netherlands.
  *
  * Licensed under EUPL, Version 1.2 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,16 @@
  */
 
 /*
- * Public API Surface of sample-plugin
+ * Public API Surface of externe-klanttaak
  */
 
-export * from "./lib/plugins/sample-plugin/models";
-export * from "./lib/plugins/sample-plugin/sample-plugin-module";
-export * from "./lib/plugins/sample-plugin/sample-plugin.specification";
-export * from "./lib/plugins/sample-plugin/components/sample-plugin-configuration/sample-plugin-configuration.component";
-export * from "./lib/plugins/sample-plugin/components/sample-action-configuration/sample-action-configuration.component";
+export * from './lib/models';
+export * from './lib/externe-klanttaak-plugin.module';
+export * from './lib/externe-klanttaak-plugin.specification';
+export * from './lib/components/externe-klanttaak-configuration/externe-klanttaak-configuration.component';
+export * from './lib/components/create-externe-klanttaak/create-externe-klanttaak.component';
+export * from './lib/components/complete-externe-klanttaak/complete-externe-klanttaak.component';
+
+export * from './lib/components/versions/v1x1x0/models';
+export * from './lib/components/versions/v1x1x0/components/create-externe-klanttaak-v1x1x0-form/create-externe-klanttaak-v1x1x0-form.component';
+export * from './lib/components/versions/v1x1x0/components/complete-externe-klanttaak-v1x1x0-form/complete-externe-klanttaak-v1x1x0-form.component';

@@ -1,12 +1,6 @@
 spring:
-  main:
-    allow-bean-definition-overriding: true
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:postgresql://localhost:54342/sample-plugin-test
-    username: test-user
-    password: password
-    driver-class-name: org.postgresql.Driver
   liquibase:
     enabled: false
   jpa:
@@ -16,19 +10,32 @@ spring:
       hibernate:
         hbm2ddl.auto: none
         generate_statistics: false
+        naming-strategy: org.springframework.boot.orm.jpa.hibernate.SpringNamingStrategy
         cache:
           use_second_level_cache: false
           use_query_cache: false
+          region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
         format_sql: true
         jdbc:
           time_zone: UTC
         connection:
-          provider_disables_autocommit: false
+          provider_disables_autocommit: true
     hibernate:
       ddl-auto: none
+
 spring-actuator:
-  username: admin
-  password: password
+  username: test
+  password: test
+
 valtimo:
   plugin:
     encryption-secret: "abcdefghijklmnop"
+  connector-encryption:
+    secret: "0123456789101112"
+
+camunda:
+    bpm:
+        history-level: audit
+        generic-properties:
+            properties:
+                enforceHistoryTimeToLive: false
