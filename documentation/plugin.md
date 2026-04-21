@@ -1,71 +1,76 @@
-# Plugin Documentation
+# Externe klanttaak library
 
-<!-- Use this page to document your plugin. Below is a suggested structure. -->
+Contains the following plugin(s):
 
-## Overview
+## Externe klanttaak Plugin
 
-This is a sample plugin demonstrating an API call action. It fetches data from a time API endpoint.
+For handling external user tasks in the ZGW landscape.
 
-## Dependencies
+### Description
 
-### Backend
+This plugin is intended to be used within the ZGW landscape and work with object that are based on the
+[Externe Klanttaak](https://dienstverleningsplatform.gitbook.io/platform-generieke-dienstverlening-public/patronen/taken/externe-klanttaak)
+specification. The plugin is internally versioned (the plugin framework doesn't support versioning) and does very little
+on its own. Versions of the Externe Klanttaak handle their own creation and completion (or any future) logic.
 
-```kotlin
-dependencies {
-    implementation("com.ritense.valtimoplugins:sample-plugin:0.0.1")
-}
-```
+The plugin supports two actions:
 
-### Frontend
+1. Create Externe Klanttaak
+2. Complete Externe Klanttaak
 
-```json
-{
-  "dependencies": {
-    "@valtimo-plugins/sample-plugin": "0.0.1"
-  }
-}
-```
+### Usage
 
-In your `app.module.ts`:
+Using the plugin comes down to a few simple steps:
 
-```typescript
-import {
-    SamplePluginModule, samplePluginSpecification,
-} from '@valtimo-plugins/sample-plugin';
+* Create a configuration instance for the plugin and configure the following properties:
+    * `pluginVersion` - the version of the contract that should be used by this plugin configuration instance.  
+      This property tells the plugin which contract to use when invoking the plugin actions on this instance and must
+      match one of the available ExterneKlanttaakVersion beans defined in
+      the [ExterneKlanttaakVersionsConfiguration](./src/main/kotlin/com/ritense/externeklanttaak/autoconfiguration/ExterneKlanttaakVersionsConfiguration.kt).
+    * `objectManagementConfigurationId` - an object management configuration that is compatible with the chosen
+      version.  
+      This is used for creating and handling changes on Externe Klanttaak objects in the Objecten API.
+    * `notificatiesApiPluginConfiguration` - a notificaties api configuration that can be used to listen to Externe
+      Klanttaak object updates.
+    * `finalizerProcess` - the handling process that will be started when an Externe Klanttaak object should be handled
+      and finalized by this plugin.  
+      This allows the implementation to customize what happens during the finalization of an Externe Klanttaak.
 
-@NgModule({
-    imports: [
-        SamplePluginModule,
-    ],
-    providers: [
-        {
-            provide: PLUGIN_TOKEN,
-            useValue: [
-                samplePluginSpecification,
-            ]
-        }
-    ]
-})
-```
+#### Example
 
-## Configuration
+For example usage run the Plugins Example app in this repository or look at the relevant autodeployments in the
+following path: `/backend/app/src/resources/config`. This example only includes version `1.1.1` of the Externe Klanttaak
+contract.
 
-List the plugin configuration properties and how to set them.
+##### Example Usage Instructions
 
-| Property | Type   | Required | Description                          |
-|----------|--------|----------|--------------------------------------|
-| apiUrl   | string | Yes      | The URL of the time API to call      |
+* Create a new `Name Change` case
+* Verify that an `Externe Klantaak V1.1.0` object has been created in objecten api (or within GZAC from the Object
+  Management page)
+* Modify above object with an answer from the user and set the status of the Externe Klanttaak to `afgerond`
+* See changes being caught and processed by gzac shortly after
+  * Case should reflect user input and modify both the process instance variable and json schema document values.
 
-## Actions
+### Development
 
-### Time API test action
+##### Adding a new version
 
-Sends a GET request to the configured API URL and returns the timezone response.
+You might need to add a new version of an action should the contract change in the specification or a customized object
+structure is necessary.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-|           |      |          |             |
+###### When adding a new version of an existing action:
 
-## Usage
+1. Implement the IExterneKlanttaak interface if you have any domain changes in the new version and add it as a deducible
+   to the interface class.
+2. Create a new ExterneKlanttaakVersion implementation either based on an existing older version or with your own logic
+   that can create your domain implementation. Make sure the `version` property matches the semver of the Externe
+   Klanttaak object specification version and is unique.
+3. Make your newly added ExterneKlanttaakVersion into a bean within the
+   [ExterneKlanttaakVersionsConfiguration](./src/main/kotlin/com/ritense/externeklanttaak/autoconfiguration/ExterneKlanttaakVersionsConfiguration.kt)
 
-Explain how to use the plugin in a process, with examples if applicable.
+## Wishlist
+
+Future functionality wishlist:
+
+* replace IPluginAction and IPluginActionConfig type deduction with a type property to avoid possible future ambiguity
+  between multiple version
