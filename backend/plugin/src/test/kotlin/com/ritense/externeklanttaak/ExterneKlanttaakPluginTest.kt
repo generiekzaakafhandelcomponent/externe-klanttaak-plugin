@@ -36,8 +36,6 @@ import com.ritense.valueresolver.ValueResolverService
 import com.ritense.zakenapi.ZaakUrlProvider
 import com.ritense.zakenapi.ZakenApiPlugin
 import com.ritense.zakenapi.link.ZaakInstanceLinkService
-import org.operaton.bpm.engine.delegate.DelegateTask
-import org.camunda.community.mockito.delegate.DelegateTaskFake
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.verify
@@ -45,12 +43,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
+import org.operaton.bpm.engine.delegate.DelegateTask
 import java.util.UUID
 import kotlin.test.Test
 
-
 internal class ExterneKlanttaakPluginTest {
-
     private lateinit var objectManagementService: ObjectManagementService
     private lateinit var pluginService: PluginService
     private lateinit var valueResolverService: ValueResolverService
@@ -78,12 +75,17 @@ internal class ExterneKlanttaakPluginTest {
         zakenApiPlugin = mock()
         objectMapper = MapperSingleton.get()
         whenever(pluginService.getObjectMapper()).thenReturn(objectMapper)
-        supportedExterneKlanttaakVersions = listOf(
-            ExterneKlanttaakVersionV1x1x0(pluginService, valueResolverService, taskService, zaakUrlProvider)
-        )
-        externeKlanttaakPlugin = ExterneKlanttaakPlugin(
-            externeKlanttaakService, supportedExterneKlanttaakVersions
-        )
+        supportedExterneKlanttaakVersions =
+            listOf(
+                ExterneKlanttaakVersionV1x1x0(pluginService, valueResolverService, taskService, zaakUrlProvider),
+            )
+        externeKlanttaakPlugin =
+            ExterneKlanttaakPlugin(
+                pluginService,
+                objectManagementService,
+                externeKlanttaakService,
+                supportedExterneKlanttaakVersions,
+            )
         externeKlanttaakPlugin.pluginVersion = Version(1, 1, 0)
         externeKlanttaakPlugin.notificatiesApiPluginConfiguration = mock()
         externeKlanttaakPlugin.objectManagementConfigurationId = mock()
@@ -96,14 +98,14 @@ internal class ExterneKlanttaakPluginTest {
 
         assertThrows<IllegalArgumentException> {
             externeKlanttaakPlugin.createExterneKlanttaak(
-                DelegateTaskFake(),
-                oldUnsupportedConfig
+                mock<DelegateTask>(),
+                oldUnsupportedConfig,
             )
         }
         assertThrows<IllegalArgumentException> {
             externeKlanttaakPlugin.createExterneKlanttaak(
-                DelegateTaskFake(),
-                futureUnsupportedConfig
+                mock<DelegateTask>(),
+                futureUnsupportedConfig,
             )
         }
     }
@@ -111,14 +113,15 @@ internal class ExterneKlanttaakPluginTest {
     @Test
     fun `should pass version check for supported action`() {
         // given
-        val action = CreateExterneKlanttaakActionConfigV1x1x0(
-            taakSoort = URL,
-            url = "pv:external-url",
-            taakReceiver = OTHER,
-            identificationKey = "bsn",
-            identificationValue = "999990755",
-            verloopdatum = "01-01-2025"
-        )
+        val action =
+            CreateExterneKlanttaakActionConfigV1x1x0(
+                taakSoort = URL,
+                url = "pv:external-url",
+                taakReceiver = OTHER,
+                identificationKey = "bsn",
+                identificationValue = "999990755",
+                verloopdatum = "01-01-2025",
+            )
         externeKlanttaakPlugin.objectManagementConfigurationId = UUID.randomUUID()
 
         // when

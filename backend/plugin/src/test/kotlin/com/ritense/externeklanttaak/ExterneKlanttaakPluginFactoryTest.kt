@@ -31,7 +31,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 
 internal class ExterneKlanttaakPluginFactoryTest {
-
     @Test
     fun `should create ExterneKlanttaakPlugin`() {
         val pluginService = mock<PluginService>()
@@ -40,24 +39,27 @@ internal class ExterneKlanttaakPluginFactoryTest {
         val notificatiesApiPluginMock = mock<NotificatiesApiPlugin>()
         whenever(pluginService.createInstance(any<PluginConfigurationId>())).thenReturn(notificatiesApiPluginMock)
 
-        val factory = ExterneKlanttaakPluginFactory(pluginService, mock(), mock())
+        val factory = ExterneKlanttaakPluginFactory(pluginService, mock(), mock(), mock())
 
-        val externeKlanttaakPluginProperties: String = """
+        val externeKlanttaakPluginProperties: String =
+            """
             {
               "pluginVersion": "1.1.0",
               "notificatiesApiPluginConfiguration": "4d9e7fe7-0671-4955-a106-fc71dc7527a6",
               "objectManagementConfigurationId": "cc713213-995d-494f-b1cd-61fecf40f86e"
             }
-        """.trimIndent()
+            """.trimIndent()
         val pluginDefinition = createPluginDefinition()
-        val pluginConfiguration = PluginConfiguration(
-            PluginConfigurationId.newId(),
-            "Klanttaak 1.1.0",
-            MapperSingleton.get()
-                .readTree(externeKlanttaakPluginProperties)
-                .deepCopy(),
-            pluginDefinition
-        )
+        val pluginConfiguration =
+            PluginConfiguration(
+                PluginConfigurationId.newId(),
+                "Klanttaak 1.1.0",
+                MapperSingleton
+                    .get()
+                    .readTree(externeKlanttaakPluginProperties)
+                    .deepCopy(),
+                pluginDefinition,
+            )
         val plugin = factory.create(pluginConfiguration)
 
         assertEquals(notificatiesApiPluginMock, plugin.notificatiesApiPluginConfiguration)
@@ -67,36 +69,49 @@ internal class ExterneKlanttaakPluginFactoryTest {
 
     private fun createPluginDefinition(): PluginDefinition {
         val propertyDefinitions = mutableSetOf<PluginProperty>()
-        val pluginDefinition = PluginDefinition(
-            "key",
-            "title",
-            "description",
-            "class",
-            propertyDefinitions
+        val pluginDefinition =
+            PluginDefinition(
+                "key",
+                "title",
+                "description",
+                "class",
+                propertyDefinitions,
+            )
+
+        propertyDefinitions.add(
+            PluginProperty(
+                "notificatiesApiPluginConfiguration",
+                pluginDefinition,
+                "title",
+                required = true,
+                secret = false,
+                "notificatiesApiPluginConfiguration",
+                "com.ritense.notificatiesapi.NotificatiesApiPlugin",
+            ),
         )
 
         propertyDefinitions.add(
             PluginProperty(
-                "notificatiesApiPluginConfiguration", pluginDefinition, "title", required = true,
-                secret = false, "notificatiesApiPluginConfiguration",
-                "com.ritense.notificatiesapi.NotificatiesApiPlugin"
-            )
+                "objectManagementConfigurationId",
+                pluginDefinition,
+                "title",
+                required = true,
+                secret = false,
+                "objectManagementConfigurationId",
+                "java.util.UUID",
+            ),
         )
 
         propertyDefinitions.add(
             PluginProperty(
-                "objectManagementConfigurationId", pluginDefinition, "title", required = true,
-                secret = false, "objectManagementConfigurationId",
-                "java.util.UUID"
-            )
-        )
-
-        propertyDefinitions.add(
-            PluginProperty(
-                "pluginVersion", pluginDefinition, "title", required = true,
-                secret = false, "pluginVersion",
-                "com.ritense.externeklanttaak.domain.Version"
-            )
+                "pluginVersion",
+                pluginDefinition,
+                "title",
+                required = true,
+                secret = false,
+                "pluginVersion",
+                "com.ritense.externeklanttaak.domain.Version",
+            ),
         )
 
         return pluginDefinition

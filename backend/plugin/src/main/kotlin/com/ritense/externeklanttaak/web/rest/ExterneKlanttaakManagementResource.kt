@@ -29,12 +29,14 @@ import org.springframework.web.bind.annotation.RestController
 @SkipComponentScan
 @RequestMapping("/api/management", produces = [APPLICATION_JSON_UTF8_VALUE])
 class ExterneKlanttaakManagementResource(
-    private val externeKlanttaakVersions: List<IExterneKlanttaakVersion>
+    private val externeKlanttaakVersions: List<IExterneKlanttaakVersion>,
 ) {
-
     @RunWithoutAuthorization
     @GetMapping("/v1/externe-klanttaak/supported-versions")
-    fun getSupportedVersions(): ResponseEntity<List<String>> {
-        return ResponseEntity.ok(externeKlanttaakVersions.map { it.version })
-    }
+    fun getSupportedVersions(): ResponseEntity<List<String>> =
+        ResponseEntity.ok(
+            externeKlanttaakVersions.map {
+                it.version
+            },
+        )
 }

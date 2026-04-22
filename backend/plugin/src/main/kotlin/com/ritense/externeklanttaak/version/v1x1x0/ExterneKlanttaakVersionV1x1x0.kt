@@ -15,8 +15,8 @@
  */
 package com.ritense.externeklanttaak.version.v1x1x0
 
-import com.ritense.externeklanttaak.domain.IExterneKlanttaakVersion
 import com.ritense.externeklanttaak.domain.IExterneKlanttaak
+import com.ritense.externeklanttaak.domain.IExterneKlanttaakVersion
 import com.ritense.externeklanttaak.domain.IPluginActionConfig
 import com.ritense.externeklanttaak.version.v1x1x0.CompleteExterneKlanttaakActionV1x1x0.CompleteExterneKlanttaakActionConfigV1x1x0
 import com.ritense.externeklanttaak.version.v1x1x0.CreateExterneKlanttaakActionV1x1x0.CreateExterneKlanttaakActionConfigV1x1x0
@@ -35,20 +35,22 @@ class ExterneKlanttaakVersionV1x1x0(
 ) : IExterneKlanttaakVersion {
     override val version: String = "1.1.0"
 
-    override fun create(pluginActionConfig: IPluginActionConfig, delegateTask: DelegateTask): IExterneKlanttaak {
+    override fun create(
+        pluginActionConfig: IPluginActionConfig,
+        delegateTask: DelegateTask,
+    ): IExterneKlanttaak {
         require(pluginActionConfig is CreateExterneKlanttaakActionConfigV1x1x0)
         return CreateExterneKlanttaakActionV1x1x0(
             pluginService,
             valueResolverService,
             zaakUrlProvider,
-        )
-            .create(pluginActionConfig, delegateTask)
+        ).create(pluginActionConfig, delegateTask)
     }
 
     override fun complete(
         externeKlanttaak: IExterneKlanttaak,
         pluginActionConfig: IPluginActionConfig,
-        delegateExecution: DelegateExecution
+        delegateExecution: DelegateExecution,
     ): IExterneKlanttaak? {
         require(externeKlanttaak is ExterneKlanttaakV1x1x0)
         require(pluginActionConfig is CompleteExterneKlanttaakActionConfigV1x1x0)
@@ -57,11 +59,10 @@ class ExterneKlanttaakVersionV1x1x0(
             valueResolverService,
             taskService,
             zaakUrlProvider,
+        ).complete(
+            externeKlanttaak = externeKlanttaak,
+            pluginActionConfig = pluginActionConfig,
+            delegateExecution = delegateExecution,
         )
-            .complete(
-                externeKlanttaak = externeKlanttaak,
-                pluginActionConfig = pluginActionConfig,
-                delegateExecution = delegateExecution
-            )
     }
 }

@@ -22,18 +22,23 @@ import kotlin.reflect.KClass
 
 interface IExterneKlanttaakVersion {
     val version: String
-    fun create(pluginActionConfig: IPluginActionConfig, delegateTask: DelegateTask): IExterneKlanttaak {
+
+    fun create(
+        pluginActionConfig: IPluginActionConfig,
+        delegateTask: DelegateTask,
+    ): IExterneKlanttaak {
         TODO("Not Implemented")
     }
 
     fun complete(
         externeKlanttaak: IExterneKlanttaak,
         pluginActionConfig: IPluginActionConfig,
-        delegateExecution: DelegateExecution
+        delegateExecution: DelegateExecution,
     ): IExterneKlanttaak? {
         TODO("Not Implemented")
     }
 
     infix fun supports(kClass: KClass<*>): Boolean = Version.fromVersionString(version) supports kClass
+
     infix fun supports(subjectVersion: Version): Boolean = Version.fromVersionString(version) == subjectVersion
 }

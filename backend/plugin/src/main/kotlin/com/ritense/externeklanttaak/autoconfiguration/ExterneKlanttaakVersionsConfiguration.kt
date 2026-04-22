@@ -29,12 +29,9 @@ import org.springframework.core.annotation.Order
 
 @AutoConfiguration
 class ExterneKlanttaakVersionsConfiguration {
-
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
-    fun ensureUniqueExterneKlanttaakVersions(
-        externeKlanttaakVersions: List<IExterneKlanttaakVersion>
-    ): Nothing? {
+    fun ensureUniqueExterneKlanttaakVersions(externeKlanttaakVersions: List<IExterneKlanttaakVersion>): Nothing? {
         if (externeKlanttaakVersions.distinctBy { it.version }.size != externeKlanttaakVersions.size) {
             throw IllegalStateException("Externe Klanttaak Versions must be unique.")
         }
@@ -46,13 +43,12 @@ class ExterneKlanttaakVersionsConfiguration {
         pluginService: PluginService,
         valueResolverService: ValueResolverService,
         taskService: OperatonTaskService,
-        zaakUrlProvider: ZaakUrlProvider
-    ): IExterneKlanttaakVersion {
-        return ExterneKlanttaakVersionV1x1x0(
+        zaakUrlProvider: ZaakUrlProvider,
+    ): IExterneKlanttaakVersion =
+        ExterneKlanttaakVersionV1x1x0(
             pluginService,
             valueResolverService,
             taskService,
-            zaakUrlProvider
+            zaakUrlProvider,
         )
-    }
 }

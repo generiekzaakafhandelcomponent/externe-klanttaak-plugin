@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.ritense.authorization.AuthorizationContext.Companion.runWithoutAuthorization
-import com.ritense.externeklanttaak.domain.IExterneKlanttaakVersion
 import com.ritense.externeklanttaak.domain.IExterneKlanttaak
+import com.ritense.externeklanttaak.domain.IExterneKlanttaakVersion
 import com.ritense.externeklanttaak.domain.IPluginActionConfig
 import com.ritense.objectenapi.ObjectenApiPlugin
 import com.ritense.objectenapi.client.ObjectRecord
@@ -55,28 +55,33 @@ open class ExterneKlanttaakService(
         delegateTask: DelegateTask,
         config: IPluginActionConfig,
     ) {
-        val objectManagement = objectManagementService.getById(objectManagementId)
-            ?: throw IllegalStateException("Could not find Object Management Configuration by ID $objectManagementId")
+        val objectManagement =
+            objectManagementService.getById(objectManagementId)
+                ?: throw IllegalStateException(
+                    "Could not find Object Management Configuration by ID $objectManagementId",
+                )
 
         val resolvedConfig =
             resolvePluginActionProperties(
                 config = config,
-                execution = delegateTask.execution
+                execution = delegateTask.execution,
             )
 
         val klanttaak =
             klanttaakVersion.create(
                 pluginActionConfig = resolvedConfig,
-                delegateTask = delegateTask
+                delegateTask = delegateTask,
             )
 
-        objectManagement.createObject(objectMapper.valueToTree(klanttaak))
+        objectManagement
+            .createObject(objectMapper.valueToTree(klanttaak))
             .also { result ->
                 logger.info {
                     "Created Externe Klanttaak object with URL [${result.url}] for task with id [${delegateTask.id}]"
                 }
                 config.resultingKlanttaakObjectUrlVariable?.let { variableName ->
-                    delegateTask.execution.setVariable(variableName, result.url)
+                    delegateTask.execution
+                        .setVariable(variableName, result.url)
                         .also {
                             logger.debug { "Created Klanttaak object url saved to variable [$variableName]" }
                         }
@@ -88,28 +93,34 @@ open class ExterneKlanttaakService(
         klanttaakVersion: IExterneKlanttaakVersion,
         config: IPluginActionConfig,
         objectManagementId: UUID,
-        execution: DelegateExecution
+        execution: DelegateExecution,
     ) {
         logger.debug { "Completing Externe Klanttaak" }
         val resolvedConfig =
             resolvePluginActionProperties(
                 config = config,
-                execution = execution
+                execution = execution,
             )
 
-        val objectManagement = objectManagementService.getById(objectManagementId)
-            ?: throw IllegalStateException("Could not find Object Management Configuration by ID $objectManagementId")
+        val objectManagement =
+            objectManagementService.getById(objectManagementId)
+                ?: throw IllegalStateException(
+                    "Could not find Object Management Configuration by ID $objectManagementId",
+                )
 
         val externeKlanttaakObject =
             objectManagement.getObjectByUrl(
                 resolvedConfig.klanttaakObjectUrl
-                    ?: throw RuntimeException("Failed get Externe Klanttaak Object from [${resolvedConfig.klanttaakObjectUrl}]")
+                    ?: throw RuntimeException(
+                        "Failed get Externe Klanttaak Object from [${resolvedConfig.klanttaakObjectUrl}]",
+                    ),
             )
 
-        val externeKlanttaak: IExterneKlanttaak = objectMapper.convertValue(
-            externeKlanttaakObject.record.data
-                ?: throw RuntimeException("Failed to handle empty object as Externe Klanttaak")
-        )
+        val externeKlanttaak: IExterneKlanttaak =
+            objectMapper.convertValue(
+                externeKlanttaakObject.record.data
+                    ?: throw RuntimeException("Failed to handle empty object as Externe Klanttaak"),
+            )
 
         val completedTaak =
             klanttaakVersion
@@ -127,7 +138,8 @@ open class ExterneKlanttaakService(
 
         runWithoutAuthorization { taskService.complete(externeKlanttaak.verwerkerTaakId) }
 
-        objectManagement.patchObject(externeKlanttaakObject.url, objectMapper.convertValue(completedTaak))
+        objectManagement
+            .patchObject(externeKlanttaakObject.url, objectMapper.convertValue(completedTaak))
             .also {
                 logger.info {
                     "Completed Externe Klanttaak with Id [${it.uuid}] and VerwerkerTaakId [${externeKlanttaak.verwerkerTaakId}]."
@@ -137,30 +149,29 @@ open class ExterneKlanttaakService(
 
     private fun resolvePluginActionProperties(
         config: IPluginActionConfig,
-        execution: DelegateExecution
+        execution: DelegateExecution,
     ): IPluginActionConfig {
         val configProperties = objectMapper.valueToTree<ObjectNode>(config)
         val requestedValues =
-            configProperties.properties()
+            configProperties
+                .properties()
                 .filter { it.value.isTextual }
                 .mapNotNull { it.value.textValue() }
         val resolvedValues =
             valueResolverService.resolveValues(
                 execution.processInstanceId,
                 execution,
-                requestedValues
+                requestedValues,
             )
 
         return objectMapper.convertValue(
             configProperties.properties().associate { (key, value) ->
                 key to (resolvedValues[value.textValue()] ?: value)
-            }
+            },
         )
     }
 
-    private fun ObjectManagement.getObjectByUrl(
-        url: String,
-    ): ObjectWrapper {
+    private fun ObjectManagement.getObjectByUrl(url: String): ObjectWrapper {
         val objectUri = URI.create(url)
         val objectenApiPlugin: ObjectenApiPlugin =
             pluginService.createInstance(objectenApiPluginConfigurationId)
@@ -168,22 +179,21 @@ open class ExterneKlanttaakService(
         return objectenApiPlugin.getObject(objectUri)
     }
 
-    private fun ObjectManagement.createObject(
-        objectData: JsonNode,
-    ): ObjectWrapper {
+    private fun ObjectManagement.createObject(objectData: JsonNode): ObjectWrapper {
         val objectenApiPlugin: ObjectenApiPlugin =
             pluginService.createInstance(objectenApiPluginConfigurationId)
         val objecttypenApiPlugin: ObjecttypenApiPlugin =
             pluginService.createInstance(objecttypenApiPluginConfigurationId)
         val objectTypeUrl = objecttypenApiPlugin.getObjectTypeUrlById(objecttypeId)
-        val createObjectRequest = ObjectRequest(
-            objectTypeUrl,
-            ObjectRecord(
-                typeVersion = objecttypeVersion,
-                data = objectData,
-                startAt = LocalDate.now()
+        val createObjectRequest =
+            ObjectRequest(
+                objectTypeUrl,
+                ObjectRecord(
+                    typeVersion = objecttypeVersion,
+                    data = objectData,
+                    startAt = LocalDate.now(),
+                ),
             )
-        )
 
         return objectenApiPlugin.createObject(createObjectRequest)
     }
@@ -194,17 +204,19 @@ open class ExterneKlanttaakService(
     ): ObjectWrapper {
         val objectenApiPlugin: ObjectenApiPlugin =
             pluginService.createInstance(objectenApiPluginConfigurationId)
-        val objecttypenApiPlugin: ObjecttypenApiPlugin = pluginService
-            .createInstance(objecttypenApiPluginConfigurationId)
+        val objecttypenApiPlugin: ObjecttypenApiPlugin =
+            pluginService
+                .createInstance(objecttypenApiPluginConfigurationId)
         val objectTypeUrl = objecttypenApiPlugin.getObjectTypeUrlById(objecttypeId)
-        val createObjectRequest = ObjectRequest(
-            objectTypeUrl,
-            ObjectRecord(
-                typeVersion = objecttypeVersion,
-                data = objectData,
-                startAt = LocalDate.now()
+        val createObjectRequest =
+            ObjectRequest(
+                objectTypeUrl,
+                ObjectRecord(
+                    typeVersion = objecttypeVersion,
+                    data = objectData,
+                    startAt = LocalDate.now(),
+                ),
             )
-        )
 
         return objectenApiPlugin.objectPatch(objectUrl, createObjectRequest)
     }

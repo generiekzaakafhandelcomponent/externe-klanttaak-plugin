@@ -32,8 +32,8 @@ import com.ritense.plugin.domain.PluginConfigurationId
 import com.ritense.plugin.service.PluginService
 import com.ritense.processdocument.domain.impl.OperatonProcessInstanceId
 import com.ritense.processdocument.service.ProcessDocumentService
-import com.ritense.valtimo.operaton.domain.OperatonTask
 import com.ritense.valtimo.contract.json.MapperSingleton
+import com.ritense.valtimo.operaton.domain.OperatonTask
 import com.ritense.valtimo.security.exceptions.TaskNotFoundException
 import com.ritense.valtimo.service.OperatonProcessService
 import com.ritense.valtimo.service.OperatonTaskService
@@ -41,7 +41,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.event.EventListener
 import org.springframework.transaction.annotation.Transactional
 import java.net.URI
-
 
 open class ExterneKlanttaakEventListener(
     private val objectManagementService: ObjectManagementService,
@@ -57,20 +56,22 @@ open class ExterneKlanttaakEventListener(
         logger.info {
             "Received Notification. Attempting to handle Resource as Externe Klanttaak Object"
         }
-        val objectTypeId = event.getObjectTypeIdOrNull()
-            ?: run {
-                logger.debug {
-                    "Skipping Event: Doesn't match handling criteria"
+        val objectTypeId =
+            event.getObjectTypeIdOrNull()
+                ?: run {
+                    logger.debug {
+                        "Skipping Event: Doesn't match handling criteria"
+                    }
+                    return@handle
                 }
-                return@handle
-            }
-        val objectManagement = objectManagementService.findByObjectTypeId(objectTypeId)
-            ?: run {
-                logger.info {
-                    "Skipping Event: Compatible Object Management configuration not found"
+        val objectManagement =
+            objectManagementService.findByObjectTypeId(objectTypeId)
+                ?: run {
+                    logger.info {
+                        "Skipping Event: Compatible Object Management configuration not found"
+                    }
+                    return@handle
                 }
-                return@handle
-            }
         val matchedPluginConfiguration =
             pluginService
                 .findPluginConfiguration(ExterneKlanttaakPlugin::class.java) { config ->
@@ -78,7 +79,7 @@ open class ExterneKlanttaakEventListener(
                         .get("objectManagementConfigurationId")
                         .textValue()
                         .equals(
-                            objectManagement.id.toString()
+                            objectManagement.id.toString(),
                         )
                 }
                 ?: run {
@@ -102,13 +103,13 @@ open class ExterneKlanttaakEventListener(
     private fun handleIfOwnExterneKlanttaak(
         resourceUrl: String,
         objectManagement: ObjectManagement,
-        pluginConfigurationId: PluginConfigurationId
+        pluginConfigurationId: PluginConfigurationId,
     ) {
         val resource = objectManagement.getObjectByUrl(resourceUrl)
         val klanttaak: IExterneKlanttaak =
             objectMapper.convertValue(
                 resource.record.data
-                    ?: throw RuntimeException("Failed to extract Externe Klanttaak body from ObjectWrapper")
+                    ?: throw RuntimeException("Failed to extract Externe Klanttaak body from ObjectWrapper"),
             )
 
         if (!klanttaak.canBeHandled()) {
@@ -117,43 +118,44 @@ open class ExterneKlanttaakEventListener(
             }
             return
         }
-        val camundaTask: OperatonTask =
+        val operatonTask: OperatonTask =
             try {
                 taskService.findTaskById(klanttaak.verwerkerTaakId)
             } catch (ex: TaskNotFoundException) {
                 logger.info {
-                    "Skipping Event: Could not find Camunda task with id ${klanttaak.verwerkerTaakId}. Externe Klanttaak doesn't belong to this application."
+                    "Skipping Event: Could not find Operaton task with id ${klanttaak.verwerkerTaakId}. Externe Klanttaak doesn't belong to this application."
                 }
                 return
             }
 
         handleResourceAsExterneKlanttaak(
             resourceUrl = resource.url,
-            camundaTask = camundaTask,
+            operatonTask = operatonTask,
             pluginConfigurationId = pluginConfigurationId,
         )
     }
 
     private fun handleResourceAsExterneKlanttaak(
         resourceUrl: URI,
-        camundaTask: OperatonTask,
-        pluginConfigurationId: PluginConfigurationId
+        operatonTask: OperatonTask,
+        pluginConfigurationId: PluginConfigurationId,
     ) {
-
         val externeKlanttaakPlugin: ExterneKlanttaakPlugin = pluginService.createInstance(pluginConfigurationId.id)
-        val processInstanceId = OperatonProcessInstanceId(camundaTask.getProcessInstanceId())
-        val documentId = runWithoutAuthorization {
-            processDocumentService.getDocumentId(processInstanceId, camundaTask)
-        }
-        val variables = mapOf(
-            EXTERNE_KLANTTAAK_OBJECT_URL.value to resourceUrl
-        )
+        val processInstanceId = OperatonProcessInstanceId(operatonTask.getProcessInstanceId())
+        val documentId =
+            runWithoutAuthorization {
+                processDocumentService.getDocumentId(processInstanceId, operatonTask)
+            }
+        val variables =
+            mapOf(
+                EXTERNE_KLANTTAAK_OBJECT_URL.value to resourceUrl,
+            )
 
-        logger.debug { "Starting finalizer process for Externe Klanttaak with verwerker task id '${camundaTask.id}'" }
+        logger.debug { "Starting finalizer process for Externe Klanttaak with verwerker task id '${operatonTask.id}'" }
         startFinalizerProcess(
             processDefinitionKey = externeKlanttaakPlugin.finalizerProcess,
             businessKey = documentId.id.toString(),
-            variables = variables
+            variables = variables,
         )
     }
 
@@ -166,28 +168,27 @@ open class ExterneKlanttaakEventListener(
             runWithoutAuthorization {
                 processService.startProcess(processDefinitionKey, businessKey, variables)
             }
-            logger.info { "Process started successfully for process definition key '$processDefinitionKey' and document id '${businessKey}'" }
+            logger.info {
+                "Process started successfully for process definition key '$processDefinitionKey' and document id '$businessKey'"
+            }
         } catch (ex: RuntimeException) {
             throw NotificatiesNotificationEventException(
                 "Could not start process with definition: $processDefinitionKey and businessKey: $businessKey.\n " +
-                    "Reason: ${ex.message}"
+                    "Reason: ${ex.message}",
             )
         }
     }
 
-    private fun NotificatiesApiNotificationReceivedEvent.getObjectTypeIdOrNull(): String? {
-        return when (
+    private fun NotificatiesApiNotificationReceivedEvent.getObjectTypeIdOrNull(): String? =
+        when (
             kanaal.equals(DEFAULT_NOTIFICATIONS_CHANNEL, true) ||
                 actie.equals(DEFAULT_NOTIFICATIONS_ACTION, true)
         ) {
             true -> kenmerken[DEFAULT_NOTIFICATION_KENMERKEN_OBJECTTYPE]?.substringAfterLast("/")
             false -> null
         }
-    }
 
-    private fun ObjectManagement.getObjectByUrl(
-        url: String,
-    ): ObjectWrapper {
+    private fun ObjectManagement.getObjectByUrl(url: String): ObjectWrapper {
         val objectUri = URI.create(url)
         val objectenApiPlugin: ObjectenApiPlugin =
             pluginService.createInstance(objectenApiPluginConfigurationId)

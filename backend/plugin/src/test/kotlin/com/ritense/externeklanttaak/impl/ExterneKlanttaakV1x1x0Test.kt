@@ -40,14 +40,14 @@ import com.ritense.zakenapi.domain.rol.BetrokkeneType.NATUURLIJK_PERSOON
 import com.ritense.zakenapi.domain.rol.Rol
 import com.ritense.zakenapi.domain.rol.RolNatuurlijkPersoon
 import org.apache.commons.codec.binary.Base32
-import org.camunda.community.mockito.delegate.DelegateExecutionFake
-import org.camunda.community.mockito.delegate.DelegateTaskFake
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.operaton.bpm.engine.delegate.DelegateExecution
+import org.operaton.bpm.engine.delegate.DelegateTask
 import java.net.URI
 import java.time.LocalDateTime
 import java.util.Date
@@ -78,7 +78,7 @@ class ExterneKlanttaakV1x1x0Test {
             CreateExterneKlanttaakActionConfigV1x1x0(
                 taakSoort = URL,
                 taakReceiver = ZAAK_INITIATOR,
-                verloopdatum = "2024-10-29"
+                verloopdatum = "2024-10-29",
             )
         }
     }
@@ -87,36 +87,36 @@ class ExterneKlanttaakV1x1x0Test {
     fun `should create URL Klanttaak instance from valid config`() {
         // given
         val processBusinessKey = UUID.randomUUID().toString()
-        val delegateExecutionFake =
-            DelegateExecutionFake()
-                .withProcessBusinessKey(processBusinessKey)
-        val delegateTask =
-            DelegateTaskFake()
-                .withId(UUID.randomUUID().toString())
-                .withName("Do something!")
-                .withExecution(delegateExecutionFake)
+        val delegateExecutionFake = mock<DelegateExecution>()
+        whenever(delegateExecutionFake.processBusinessKey).thenReturn(processBusinessKey)
+        val delegateTask = mock<DelegateTask>()
+        whenever(delegateTask.id).thenReturn(processBusinessKey)
+        whenever(delegateTask.name).thenReturn(processBusinessKey)
+        whenever(delegateTask.execution).thenReturn(delegateExecutionFake)
         val zaakUrl = URI.create("https://example.com/zaak-url")
-        val zaakRollen = listOf(
-            Rol(
-                zaak = zaakUrl,
-                roltype = zaakUrl,
-                betrokkeneType = NATUURLIJK_PERSOON,
-                roltoelichting = "",
-                betrokkeneIdentificatie = RolNatuurlijkPersoon(inpBsn = "999990755")
+        val zaakRollen =
+            listOf(
+                Rol(
+                    zaak = zaakUrl,
+                    roltype = zaakUrl,
+                    betrokkeneType = NATUURLIJK_PERSOON,
+                    roltoelichting = "",
+                    betrokkeneIdentificatie = RolNatuurlijkPersoon(inpBsn = "999990755"),
+                ),
             )
-        )
-        val externeKlanttaakVersion = ExterneKlanttaakVersionV1x1x0(
-            pluginService,
-            valueResolverService,
-            taskservice,
-            zaakUrlProvider
-        )
+        val externeKlanttaakVersion =
+            ExterneKlanttaakVersionV1x1x0(
+                pluginService,
+                valueResolverService,
+                taskservice,
+                zaakUrlProvider,
+            )
         val createActionConfig =
             CreateExterneKlanttaakActionConfigV1x1x0(
                 taakSoort = URL,
                 url = "https://example.com/some-task",
                 taakReceiver = ZAAK_INITIATOR,
-                verloopdatum = "2024-10-29"
+                verloopdatum = "2024-10-29",
             )
 
         whenever(zaakUrlProvider.getZaakUrl(any()))
@@ -131,7 +131,7 @@ class ExterneKlanttaakV1x1x0Test {
         val klanttaak: IExterneKlanttaak =
             externeKlanttaakVersion.create(createActionConfig, delegateTask)
 
-        //then
+        // then
         assertTrue(klanttaak is ExterneKlanttaakV1x1x0)
         assertEquals(delegateTask.id, klanttaak.verwerkerTaakId)
         assertEquals(URL, klanttaak.soort)
@@ -146,38 +146,37 @@ class ExterneKlanttaakV1x1x0Test {
         // given
         val processBusinessKey = UUID.randomUUID().toString()
         val processInstanceId = UUID.randomUUID().toString()
-        val delegateExecutionFake =
-            DelegateExecutionFake()
-                .withBusinessKey(processBusinessKey)
-                .withProcessInstanceId(processInstanceId)
-        val delegateTask =
-            DelegateTaskFake()
-                .withId(UUID.randomUUID().toString())
-                .withName("Do something!")
-                .withExecution(delegateExecutionFake)
+        val delegateExecutionFake = mock<DelegateExecution>()
+        whenever(delegateExecutionFake.businessKey).thenReturn(processBusinessKey)
+        whenever(delegateExecutionFake.processInstanceId).thenReturn(processInstanceId)
+        val delegateTask = mock<DelegateTask>()
+        whenever(delegateTask.id).thenReturn(UUID.randomUUID().toString())
+        whenever(delegateTask.name).thenReturn("Do something!")
+        whenever(delegateTask.execution).thenReturn(delegateExecutionFake)
 
         val createActionConfig =
             CreateExterneKlanttaakActionConfigV1x1x0(
                 taakSoort = PORTAALFORMULIER,
                 portaalformulierSoort = FormulierSoort.URL,
                 portaalformulierValue = "http://example.com/objecten/api/v1/form-object",
-                portaalformulierData = listOf(
-                    DataBindingConfig(
-                        key = "pv:voornaam",
-                        value = "/voornaam",
-                    )
-                ),
+                portaalformulierData =
+                    listOf(
+                        DataBindingConfig(
+                            key = "pv:voornaam",
+                            value = "/voornaam",
+                        ),
+                    ),
                 taakReceiver = OTHER,
                 identificationKey = TYPE_KVK,
                 identificationValue = "000000001",
                 koppelingRegistratie = ZAAK,
                 koppelingUuid = UUID.randomUUID().toString(),
             )
-        whenever(valueResolverService.resolveValues(any(), any()))
+        whenever(valueResolverService.resolveValues(any<String>(), any()))
             .thenReturn(
                 mapOf(
-                    "pv:voornaam" to "Jan"
-                )
+                    "pv:voornaam" to "Jan",
+                ),
             )
 
         // when
@@ -185,11 +184,10 @@ class ExterneKlanttaakV1x1x0Test {
             CreateExterneKlanttaakActionV1x1x0(
                 pluginService,
                 valueResolverService,
-                zaakUrlProvider
-            )
-                .create(createActionConfig, delegateTask)
+                zaakUrlProvider,
+            ).create(createActionConfig, delegateTask)
 
-        //then
+        // then
         assertTrue(klanttaak is ExterneKlanttaakV1x1x0)
         assertEquals(delegateTask.id, klanttaak.verwerkerTaakId)
         assertEquals(PORTAALFORMULIER, klanttaak.soort)
@@ -205,16 +203,13 @@ class ExterneKlanttaakV1x1x0Test {
         val processBusinessKey = UUID.randomUUID().toString()
         val kenmerk = Base32().encode(processBusinessKey.toByteArray()).toString(Charsets.UTF_8)
         val delegateExecutionFake =
-            DelegateExecutionFake()
-                .withProcessBusinessKey(processBusinessKey)
-        val delegateTask =
-            DelegateTaskFake()
-                .withId(UUID.randomUUID().toString())
-                .withName("Do something!")
-                .withExecution(delegateExecutionFake)
-                .apply {
-                    dueDate = Date()
-                }
+            mock<DelegateExecution>()
+        whenever(delegateExecutionFake.processBusinessKey).thenReturn(processBusinessKey)
+        val delegateTask = mock<DelegateTask>()
+        whenever(delegateTask.id).thenReturn(UUID.randomUUID().toString())
+        whenever(delegateTask.name).thenReturn("Do something!")
+        whenever(delegateTask.execution).thenReturn(delegateExecutionFake)
+        whenever(delegateTask.dueDate).thenReturn(Date())
 
         val createActionConfig =
             CreateExterneKlanttaakActionConfigV1x1x0(
@@ -231,14 +226,14 @@ class ExterneKlanttaakV1x1x0Test {
 
         // when
 
-        val klanttaak = CreateExterneKlanttaakActionV1x1x0(
-            pluginService,
-            valueResolverService,
-            zaakUrlProvider
-        )
-            .create(createActionConfig, delegateTask)
+        val klanttaak =
+            CreateExterneKlanttaakActionV1x1x0(
+                pluginService,
+                valueResolverService,
+                zaakUrlProvider,
+            ).create(createActionConfig, delegateTask)
 
-        //then
+        // then
         assertTrue(klanttaak is ExterneKlanttaakV1x1x0)
         assertEquals(delegateTask.id, klanttaak.verwerkerTaakId)
         assertEquals(OGONEBETALING, klanttaak.soort)

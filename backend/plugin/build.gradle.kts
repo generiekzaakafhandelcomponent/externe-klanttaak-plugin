@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-val camundaMockitoVersion: String by project
 val kotlinLoggingVersion: String by project
 val mockitoKotlinVersion: String by project
 val okhttpVersion: String by project
+val operatonVersion: String by project
 
 dockerCompose {
     setProjectName("externe-klanttaak")
@@ -60,10 +60,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation("org.springframework.data:spring-data-jpa")
     testImplementation("com.squareup.okhttp3:mockwebserver:$okhttpVersion")
-    testImplementation("org.camunda.community.mockito:camunda-platform-7-mockito:$camundaMockitoVersion")
     testImplementation("org.hamcrest:hamcrest-library")
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
+
+    testImplementation("org.operaton.bpm:operaton-engine:$operatonVersion")
 
     testImplementation("org.postgresql:postgresql")
 

@@ -34,7 +34,6 @@ import org.mockito.kotlin.whenever
 import java.util.UUID
 
 class ExterneKlanttaakEventListenerTest {
-
     private lateinit var externeklanttaakEventListener: ExterneKlanttaakEventListener
     private lateinit var objectManagementService: ObjectManagementService
     private lateinit var pluginService: PluginService
@@ -47,7 +46,7 @@ class ExterneKlanttaakEventListenerTest {
     private lateinit var objecttypenApiPlugin: ObjecttypenApiPlugin
     private lateinit var externeKlanttaakPlugin: ExterneKlanttaakPlugin
     private lateinit var externeKlanttaakService: ExterneKlanttaakService
-    private lateinit var camundaTask: OperatonTask
+    private lateinit var operatonTask: OperatonTask
 
     @BeforeEach
     fun setUp() {
@@ -61,21 +60,24 @@ class ExterneKlanttaakEventListenerTest {
         objecttypenApiPlugin = mock()
         externeKlanttaakPluginConfig = mock()
         externeKlanttaakService = mock()
-        camundaTask = mock()
+        operatonTask = mock()
 
         externeKlanttaakPlugin =
             ExterneKlanttaakPlugin(
+                pluginService = pluginService,
+                objectManagementService = objectManagementService,
                 externeKlanttaakService = externeKlanttaakService,
-                availableExterneKlanttaakVersions = mock<List<IExterneKlanttaakVersion>>()
+                availableExterneKlanttaakVersions = mock<List<IExterneKlanttaakVersion>>(),
             )
 
-        externeklanttaakEventListener = ExterneKlanttaakEventListener(
-            objectManagementService,
-            pluginService,
-            taskService,
-            processDocumentService,
-            processService,
-        )
+        externeklanttaakEventListener =
+            ExterneKlanttaakEventListener(
+                objectManagementService,
+                pluginService,
+                taskService,
+                processDocumentService,
+                processService,
+            )
     }
 
     @Test
@@ -84,14 +86,18 @@ class ExterneKlanttaakEventListenerTest {
         val objectenApiPluginId = UUID.randomUUID()
         val externeKlanttaakPluginId = UUID.randomUUID()
         val finalizerProcess = "test-finalizer-process"
-        val event = NotificatiesApiNotificationReceivedEvent(
-            "objecten",
-            objectUrl,
-            "update",
-            mapOf(
-                "objectType" to objecttypeUrl,
+        val event =
+            NotificatiesApiNotificationReceivedEvent(
+                kanaal = "objecten",
+                hoofdObject = null,
+                resourceUrl = objectUrl,
+                actie = "update",
+                aanmaakdatum = null,
+                kenmerken =
+                    mapOf(
+                        "objectType" to objecttypeUrl,
+                    ),
             )
-        )
 
         whenever(objectManagementService.findByObjectTypeId(objecttypeId))
             .thenReturn(objectManagement)
@@ -110,11 +116,11 @@ class ExterneKlanttaakEventListenerTest {
                 externeKlanttaakPlugin
                     .also {
                         it.finalizerProcess = finalizerProcess
-                    }
+                    },
             )
         whenever(taskService.findTaskById(any()))
-            .thenReturn(camundaTask)
-        whenever(camundaTask.getProcessInstanceId())
+            .thenReturn(operatonTask)
+        whenever(operatonTask.getProcessInstanceId())
             .thenReturn(UUID.randomUUID().toString())
         whenever(processDocumentService.getDocumentId(any(), any()))
             .thenReturn(JsonSchemaDocumentId.newId(UUID.randomUUID()))

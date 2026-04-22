@@ -70,94 +70,119 @@ class CreateExterneKlanttaakActionV1x1x0(
 ) : IPluginAction {
     fun create(
         pluginActionConfig: CreateExterneKlanttaakActionConfigV1x1x0,
-        delegateTask: DelegateTask
-    ): IExterneKlanttaak {
-        return ExterneKlanttaakV1x1x0(
-            titel = requireNotNull(pluginActionConfig.taakTitel ?: delegateTask.name) {
-                "Required property [taakTitel] was not provided and fallback DelegateTask::name is null"
-            },
+        delegateTask: DelegateTask,
+    ): IExterneKlanttaak =
+        ExterneKlanttaakV1x1x0(
+            titel =
+                requireNotNull(pluginActionConfig.taakTitel ?: delegateTask.name) {
+                    "Required property [taakTitel] was not provided and fallback DelegateTask::name is null"
+                },
             status = OPEN,
             soort = pluginActionConfig.taakSoort,
-            url = if (pluginActionConfig.taakSoort == URL && !pluginActionConfig.url.isNullOrBlank()) {
-                ExterneTaakUrl(uri = pluginActionConfig.url)
-            } else null,
-            ogonebetaling = if (pluginActionConfig.taakSoort == OGONEBETALING) {
-                OgoneBetaling(
-                    bedrag =
-                        requireNotNull(pluginActionConfig.ogoneBedrag) {
-                            "Property [ogoneBedrag] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
-                        }
-                            .toDouble(),
-                    betaalkenmerk = requireNotNull(pluginActionConfig.ogoneBetaalkenmerk) {
-                        "Property [ogoneBetaalkenmerk] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
-                    },
-                    pspid = requireNotNull(pluginActionConfig.ogonePspid) {
-                        "Property [ogonePspid] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
-                    },
-                )
-            } else null,
-            portaalformulier = if (pluginActionConfig.taakSoort == PORTAALFORMULIER) {
-                PortaalFormulier(
-                    formulier = TaakFormulier(
-                        soort = requireNotNull(pluginActionConfig.portaalformulierSoort) {
-                            "Property [portaalformulierSoort] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
-                        },
-                        value = requireNotNull(pluginActionConfig.portaalformulierValue) {
-                            "Property [portaalformulierValue] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
-                        },
-                    ),
-                    data =
-                        resolveFormulierTaakData(
-                            delegateTask = delegateTask,
-                            sendData = pluginActionConfig.portaalformulierData,
-                            documentId = delegateTask.execution.businessKey
-                        )
-                )
-            } else null,
-            identificatie = when (pluginActionConfig.taakReceiver) {
-                ZAAK_INITIATOR -> getZaakinitiatorByDocumentId(delegateTask.execution.processBusinessKey)
-                OTHER -> TaakIdentificatie(
-                    type = requireNotNull(pluginActionConfig.identificationKey) {
-                        "Property [identificationKey] is required when [taakReceiver] is ${pluginActionConfig.taakReceiver}"
-                    },
-                    value = requireNotNull(pluginActionConfig.identificationValue) {
-                        "Property [identificationValue] is required when [taakReceiver] is ${pluginActionConfig.taakReceiver}"
-                    },
-                )
-            },
-            koppeling = pluginActionConfig.koppelingRegistratie?.let {
-                TaakKoppeling(
-                    registratie = it,
-                    value = requireNotNull(pluginActionConfig.koppelingUuid) {
-                        "Property [portaalformulierValue] is required when [koppelingRegistratie] is ${pluginActionConfig.koppelingRegistratie}"
-                    },
-                )
-            },
-            verloopdatum = stringAsInstantOrNull(pluginActionConfig.verloopdatum)
-                ?.let {
-                    LocalDateTime.ofInstant(it, ZoneOffset.UTC)
-                }
-                ?: delegateTask.dueDate?.let {
-                    LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC)
+            url =
+                if (pluginActionConfig.taakSoort == URL && !pluginActionConfig.url.isNullOrBlank()) {
+                    ExterneTaakUrl(uri = pluginActionConfig.url)
+                } else {
+                    null
                 },
-            verwerkerTaakId = delegateTask.id
+            ogonebetaling =
+                if (pluginActionConfig.taakSoort == OGONEBETALING) {
+                    OgoneBetaling(
+                        bedrag =
+                            requireNotNull(pluginActionConfig.ogoneBedrag) {
+                                "Property [ogoneBedrag] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
+                            }.toDouble(),
+                        betaalkenmerk =
+                            requireNotNull(pluginActionConfig.ogoneBetaalkenmerk) {
+                                "Property [ogoneBetaalkenmerk] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
+                            },
+                        pspid =
+                            requireNotNull(pluginActionConfig.ogonePspid) {
+                                "Property [ogonePspid] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
+                            },
+                    )
+                } else {
+                    null
+                },
+            portaalformulier =
+                if (pluginActionConfig.taakSoort == PORTAALFORMULIER) {
+                    PortaalFormulier(
+                        formulier =
+                            TaakFormulier(
+                                soort =
+                                    requireNotNull(pluginActionConfig.portaalformulierSoort) {
+                                        "Property [portaalformulierSoort] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
+                                    },
+                                value =
+                                    requireNotNull(pluginActionConfig.portaalformulierValue) {
+                                        "Property [portaalformulierValue] is required when [taakSoort] is ${pluginActionConfig.taakSoort}"
+                                    },
+                            ),
+                        data =
+                            resolveFormulierTaakData(
+                                delegateTask = delegateTask,
+                                sendData = pluginActionConfig.portaalformulierData,
+                                documentId = delegateTask.execution.businessKey,
+                            ),
+                    )
+                } else {
+                    null
+                },
+            identificatie =
+                when (pluginActionConfig.taakReceiver) {
+                    ZAAK_INITIATOR -> getZaakinitiatorByDocumentId(delegateTask.execution.processBusinessKey)
+                    OTHER ->
+                        TaakIdentificatie(
+                            type =
+                                requireNotNull(pluginActionConfig.identificationKey) {
+                                    "Property [identificationKey] is required when [taakReceiver] is ${pluginActionConfig.taakReceiver}"
+                                },
+                            value =
+                                requireNotNull(pluginActionConfig.identificationValue) {
+                                    "Property [identificationValue] is required when [taakReceiver] is ${pluginActionConfig.taakReceiver}"
+                                },
+                        )
+                },
+            koppeling =
+                pluginActionConfig.koppelingRegistratie?.let {
+                    TaakKoppeling(
+                        registratie = it,
+                        value =
+                            requireNotNull(pluginActionConfig.koppelingUuid) {
+                                "Property [portaalformulierValue] is required when [koppelingRegistratie] is ${pluginActionConfig.koppelingRegistratie}"
+                            },
+                    )
+                },
+            verloopdatum =
+                stringAsInstantOrNull(pluginActionConfig.verloopdatum)
+                    ?.let {
+                        LocalDateTime.ofInstant(it, ZoneOffset.UTC)
+                    }
+                    ?: delegateTask.dueDate?.let {
+                        LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC)
+                    },
+            verwerkerTaakId = delegateTask.id,
         )
-    }
 
     private fun stringAsInstantOrNull(input: String?): Instant? {
-        val commonGzacDateTimeFormats = listOf(
-            DateTimeFormatter.BASIC_ISO_DATE,
-            DateTimeFormatter.ofPattern("d-MM-uuuu"), // mm-DD-yyyy
-            DateTimeFormatter.ISO_LOCAL_DATE,
-            DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-            DateTimeFormatter.ISO_ZONED_DATE_TIME,
-            DateTimeFormatter.ISO_INSTANT,
-        )
+        val commonGzacDateTimeFormats =
+            listOf(
+                DateTimeFormatter.BASIC_ISO_DATE,
+                DateTimeFormatter.ofPattern("d-MM-uuuu"), // mm-DD-yyyy
+                DateTimeFormatter.ISO_LOCAL_DATE,
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+                DateTimeFormatter.ISO_ZONED_DATE_TIME,
+                DateTimeFormatter.ISO_INSTANT,
+            )
 
         return input?.let {
             commonGzacDateTimeFormats.firstNotNullOfOrNull {
                 try {
-                    LocalDate.parse(input, it).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()
+                    LocalDate
+                        .parse(input, it)
+                        .atStartOfDay()
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
                 } catch (ex: RuntimeException) {
                     logger.debug { "Input string [$input] didn't match DateTimeFormatter [$it]" }
                     null
@@ -169,55 +194,66 @@ class CreateExterneKlanttaakActionV1x1x0(
     private fun getZaakinitiatorByDocumentId(businessKey: String): TaakIdentificatie {
         val (zaakUrl, zakenApiPlugin) = getZaakUrlAndPluginByDocumentId(businessKey)
 
-        val initiator = requireNotNull(
-            zakenApiPlugin.getZaakRollen(zaakUrl, RolTypeGeneriekeBeschrijving.INITIATOR).firstOrNull()
-        ) { "No initiator role found for zaak with URL $zaakUrl" }
+        val initiator =
+            requireNotNull(
+                zakenApiPlugin.getZaakRollen(zaakUrl, RolTypeGeneriekeBeschrijving.INITIATOR).firstOrNull(),
+            ) { "No initiator role found for zaak with URL $zaakUrl" }
 
         return requireNotNull(
             initiator.betrokkeneIdentificatie.let {
                 when (it) {
-                    is RolNatuurlijkPersoon -> TaakIdentificatie(
-                        TYPE_BSN,
-                        requireNotNull(it.inpBsn) {
-                            "Zaak initiator did not have valid inpBsn BSN"
-                        }
-                    )
+                    is RolNatuurlijkPersoon ->
+                        TaakIdentificatie(
+                            TYPE_BSN,
+                            requireNotNull(it.inpBsn) {
+                                "Zaak initiator did not have valid inpBsn BSN"
+                            },
+                        )
 
-                    is RolNietNatuurlijkPersoon -> TaakIdentificatie(
-                        TYPE_KVK,
-                        requireNotNull(it.annIdentificatie) {
-                            "Zaak initiator did not have valid annIdentificatie KVK"
-                        }
-                    )
+                    is RolNietNatuurlijkPersoon ->
+                        TaakIdentificatie(
+                            TYPE_KVK,
+                            requireNotNull(it.annIdentificatie) {
+                                "Zaak initiator did not have valid annIdentificatie KVK"
+                            },
+                        )
 
                     else -> null
                 }
-            }
-        ) { "Could not map initiator identificatie (value=${initiator.betrokkeneIdentificatie}) for zaak with URL $zaakUrl to TaakIdentificatie" }
+            },
+        ) {
+            "Could not map initiator identificatie (value=${initiator.betrokkeneIdentificatie}) for zaak with URL $zaakUrl to TaakIdentificatie"
+        }
     }
 
     private fun getZaakUrlAndPluginByDocumentId(businessKey: String): Pair<URI, ZakenApiPlugin> {
         val documentId = UUID.fromString(businessKey)
         val zaakUrl = zaakUrlProvider.getZaakUrl(documentId)
-        val zakenApiPlugin = requireNotNull(
-            pluginService.createInstance(ZakenApiPlugin::class.java, ZakenApiPlugin.findConfigurationByUrl(zaakUrl))
-        ) { "No plugin configuration was found for zaak with URL $zaakUrl" }
+        val zakenApiPlugin =
+            requireNotNull(
+                pluginService.createInstance(
+                    ZakenApiPlugin::class.java,
+                    ZakenApiPlugin.findConfigurationByUrl(zaakUrl),
+                ),
+            ) { "No plugin configuration was found for zaak with URL $zaakUrl" }
         return Pair(zaakUrl, zakenApiPlugin)
     }
 
     private fun resolveFormulierTaakData(
         delegateTask: DelegateTask,
         sendData: List<DataBindingConfig>,
-        documentId: String
+        documentId: String,
     ): Map<String, Any> {
         val sendDataValuesResolvedMap = valueResolverService.resolveValues(documentId, sendData.map { it.key })
 
         if (sendData.size != sendDataValuesResolvedMap.size) {
-            val failedValues = sendData
-                .filter { !sendDataValuesResolvedMap.containsKey(it.key) }
-                .joinToString(", ") { "'${it.key}' = '${it.value}'" }
+            val failedValues =
+                sendData
+                    .filter { !sendDataValuesResolvedMap.containsKey(it.key) }
+                    .joinToString(", ") { "'${it.key}' = '${it.value}'" }
             throw IllegalArgumentException(
-                "Error in sendData for task: '${delegateTask.taskDefinitionKey}' and documentId: '${documentId}'. Failed to resolve values: $failedValues".trimMargin()
+                "Error in sendData for task: '${delegateTask.taskDefinitionKey}' and documentId: '$documentId'. Failed to resolve values: $failedValues"
+                    .trimMargin(),
             )
         }
 

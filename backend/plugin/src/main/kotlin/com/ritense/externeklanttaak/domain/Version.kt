@@ -25,7 +25,6 @@ data class Version(
     val minor: Int = 0,
     val patch: Int = 0,
 ) : Comparable<Version> {
-
     override fun compareTo(other: Version): Int {
         if (this.major != other.major) {
             return this.major - other.major
@@ -42,9 +41,7 @@ data class Version(
         return 0
     }
 
-    override fun toString(): String {
-        return "$major.$minor.$patch"
-    }
+    override fun toString(): String = "$major.$minor.$patch"
 
     infix fun supports(kClass: KClass<*>): Boolean {
         return kClass

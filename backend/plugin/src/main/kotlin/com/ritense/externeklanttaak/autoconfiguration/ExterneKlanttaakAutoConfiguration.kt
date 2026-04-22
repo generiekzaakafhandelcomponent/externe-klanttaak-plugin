@@ -37,21 +37,16 @@ import org.springframework.core.annotation.Order
 
 @AutoConfiguration
 class ExterneKlanttaakAutoConfiguration {
-
     @Order(390)
     @Bean
     @ConditionalOnMissingBean(ExterneKlanttaakSecurityConfigurer::class)
-    fun externeKlanttaakSecurityConfigurer(): HttpSecurityConfigurer {
-        return ExterneKlanttaakSecurityConfigurer()
-    }
+    fun externeKlanttaakSecurityConfigurer(): HttpSecurityConfigurer = ExterneKlanttaakSecurityConfigurer()
 
     @Bean
     @ConditionalOnMissingBean(ExterneKlanttaakManagementResource::class)
     fun externeKlanttaakPluginManagementResource(
-        externeKlanttaakVersions: List<IExterneKlanttaakVersion>
-    ): ExterneKlanttaakManagementResource {
-        return ExterneKlanttaakManagementResource(externeKlanttaakVersions)
-    }
+        externeKlanttaakVersions: List<IExterneKlanttaakVersion>,
+    ): ExterneKlanttaakManagementResource = ExterneKlanttaakManagementResource(externeKlanttaakVersions)
 
     @Bean
     @ConditionalOnMissingBean(ExterneKlanttaakService::class)
@@ -62,28 +57,28 @@ class ExterneKlanttaakAutoConfiguration {
         processDocumentService: ProcessDocumentService,
         zaakInstanceLinkService: ZaakInstanceLinkService,
         taskService: OperatonTaskService,
-    ): ExterneKlanttaakService {
-        return ExterneKlanttaakService(
+    ): ExterneKlanttaakService =
+        ExterneKlanttaakService(
             objectManagementService,
             pluginService,
             valueResolverService,
             taskService,
         )
-    }
 
     @Bean
     @ConditionalOnMissingBean(ExterneKlanttaakPluginFactory::class)
     fun externeKlanttaakPluginFactory(
         pluginService: PluginService,
+        objectManagementService: ObjectManagementService,
         externeKlanttaakService: ExterneKlanttaakService,
         externeKlanttaakVersions: List<IExterneKlanttaakVersion>,
-    ): ExterneKlanttaakPluginFactory {
-        return ExterneKlanttaakPluginFactory(
+    ): ExterneKlanttaakPluginFactory =
+        ExterneKlanttaakPluginFactory(
             pluginService,
+            objectManagementService,
             externeKlanttaakService,
             externeKlanttaakVersions,
         )
-    }
 
     @Bean
     @ConditionalOnMissingBean(ExterneKlanttaakEventListener::class)
@@ -93,13 +88,12 @@ class ExterneKlanttaakAutoConfiguration {
         taskService: OperatonTaskService,
         processDocumentService: ProcessDocumentService,
         processService: OperatonProcessService,
-    ): ExterneKlanttaakEventListener {
-        return ExterneKlanttaakEventListener(
+    ): ExterneKlanttaakEventListener =
+        ExterneKlanttaakEventListener(
             objectManagementService,
             pluginService,
             taskService,
             processDocumentService,
             processService,
         )
-    }
 }

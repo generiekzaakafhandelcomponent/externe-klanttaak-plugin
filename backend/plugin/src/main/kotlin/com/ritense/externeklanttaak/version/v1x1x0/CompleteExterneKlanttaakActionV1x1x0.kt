@@ -52,14 +52,15 @@ class CompleteExterneKlanttaakActionV1x1x0(
     fun complete(
         externeKlanttaak: ExterneKlanttaakV1x1x0,
         pluginActionConfig: CompleteExterneKlanttaakActionConfigV1x1x0,
-        delegateExecution: DelegateExecution
-    ): IExterneKlanttaak? {
-        return when (externeKlanttaak.canBeHandled()) {
+        delegateExecution: DelegateExecution,
+    ): IExterneKlanttaak? =
+        when (externeKlanttaak.canBeHandled()) {
             true -> {
                 if (externeKlanttaak.soort == PORTAALFORMULIER) {
-                    val verzondenData = requireNotNull(externeKlanttaak.portaalformulier?.verzondenData) {
-                        "Property [portaalformulier] is required when [taakSoort] is ${externeKlanttaak.soort}"
-                    }
+                    val verzondenData =
+                        requireNotNull(externeKlanttaak.portaalformulier?.verzondenData) {
+                            "Property [portaalformulier] is required when [taakSoort] is ${externeKlanttaak.soort}"
+                        }
                     if (pluginActionConfig.koppelDocumenten) {
                         linkDocumentsToZaak(
                             documentPathsPath = pluginActionConfig.documentPadenPad,
@@ -84,14 +85,17 @@ class CompleteExterneKlanttaakActionV1x1x0(
                 null
             }
         }
-    }
 
     private fun getZaakUrlAndPluginByDocumentId(businessKey: String): Pair<URI, ZakenApiPlugin> {
         val documentId = UUID.fromString(businessKey)
         val zaakUrl = zaakUrlProvider.getZaakUrl(documentId)
-        val zakenApiPlugin = requireNotNull(
-            pluginService.createInstance(ZakenApiPlugin::class.java, ZakenApiPlugin.findConfigurationByUrl(zaakUrl))
-        ) { "No plugin configuration was found for zaak with URL $zaakUrl" }
+        val zakenApiPlugin =
+            requireNotNull(
+                pluginService.createInstance(
+                    ZakenApiPlugin::class.java,
+                    ZakenApiPlugin.findConfigurationByUrl(zaakUrl),
+                ),
+            ) { "No plugin configuration was found for zaak with URL $zaakUrl" }
         return Pair(zaakUrl, zakenApiPlugin)
     }
 
@@ -125,10 +129,11 @@ class CompleteExterneKlanttaakActionV1x1x0(
         verzondenData: Map<String, Any>,
         delegateExecution: DelegateExecution,
     ) {
-        val documenten = getDocumentUrisFromSubmission(
-            documentPathsPath = documentPathsPath,
-            data = verzondenData,
-        )
+        val documenten =
+            getDocumentUrisFromSubmission(
+                documentPathsPath = documentPathsPath,
+                data = verzondenData,
+            )
         if (documenten.isNotEmpty()) {
             val (_, zakenApiPlugin) = getZaakUrlAndPluginByDocumentId(delegateExecution.processBusinessKey)
             documenten.forEach { documentUri ->
@@ -136,7 +141,7 @@ class CompleteExterneKlanttaakActionV1x1x0(
                     execution = delegateExecution,
                     documentUrl = documentUri,
                     titel = DEFAULT_ZAAKDOCUMENT_TITLE,
-                    beschrijving = DEFAULT_ZAAKDOCUMENT_OMSCHRIJVING
+                    beschrijving = DEFAULT_ZAAKDOCUMENT_OMSCHRIJVING,
                 )
             }
         }
@@ -144,7 +149,7 @@ class CompleteExterneKlanttaakActionV1x1x0(
 
     internal fun getDocumentUrisFromSubmission(
         documentPathsPath: String? = "/documenten",
-        data: Map<String, Any>
+        data: Map<String, Any>,
     ): List<String> {
         val dataNode: ObjectNode = objectMapper.valueToTree(data)
         val documentPathsNode = dataNode.at(documentPathsPath)
@@ -153,7 +158,7 @@ class CompleteExterneKlanttaakActionV1x1x0(
         }
         if (!documentPathsNode.isArray) {
             throw NotificatiesNotificationEventException(
-                "Could not retrieve document Urls.'/documenten' is not an array"
+                "Could not retrieve document Urls.'/documenten' is not an array",
             )
         }
         val documentenUris = mutableListOf<String>()
@@ -167,12 +172,12 @@ class CompleteExterneKlanttaakActionV1x1x0(
                         documentUrlNode.forEach { documentenUris.add(it.textValue()) }
                     } else {
                         throw NotificatiesNotificationEventException(
-                            "Could not retrieve document Urls. Found invalid URL in '/documenten'. ${documentUrlNode.toPrettyString()}"
+                            "Could not retrieve document Urls. Found invalid URL in '/documenten'. ${documentUrlNode.toPrettyString()}",
                         )
                     }
                 } catch (e: MalformedURLException) {
                     throw NotificatiesNotificationEventException(
-                        "Could not retrieve document Urls. Malformed URL in: '/documenten'"
+                        "Could not retrieve document Urls. Malformed URL in: '/documenten'",
                     )
                 }
             }
@@ -180,11 +185,18 @@ class CompleteExterneKlanttaakActionV1x1x0(
         return documentenUris
     }
 
-    private fun getResolvedValues(receiveData: List<DataBindingConfig>, data: JsonNode): Map<String, Any> {
-        return receiveData.associateBy({ it.key }, { getValue(data, it.value) })
-    }
+    private fun getResolvedValues(
+        receiveData: List<DataBindingConfig>,
+        data: JsonNode,
+    ): Map<String, Any> =
+        receiveData.associateBy({
+            it.key
+        }, { getValue(data, it.value) })
 
-    private fun getValue(data: JsonNode, path: String): Any {
+    private fun getValue(
+        data: JsonNode,
+        path: String,
+    ): Any {
         val valueNode = data.at(JsonPointer.valueOf(path))
         if (valueNode.isMissingNode) {
             throw RuntimeException("Failed to find path '$path' in data: \n${data.toPrettyString()}")

@@ -40,7 +40,9 @@ data class ExterneKlanttaakV1x1x0(
 ) : IExterneKlanttaak {
     override fun canBeHandled(): Boolean = status == AFGEROND
 
-    enum class FormulierSoort(@JsonValue val value: String) {
+    enum class FormulierSoort(
+        @JsonValue val value: String,
+    ) {
         ID("id"),
         URL("url"),
         ;
@@ -50,11 +52,11 @@ data class ExterneKlanttaakV1x1x0(
 
     data class DataBindingConfig(
         val key: String,
-        val value: String
+        val value: String,
     )
 
     data class ExterneTaakUrl(
-        val uri: String
+        val uri: String,
     )
 
     data class OgoneBetaling(
@@ -72,12 +74,12 @@ data class ExterneKlanttaakV1x1x0(
 
     data class TaakFormulier(
         val soort: FormulierSoort,
-        val value: String
+        val value: String,
     )
 
     data class TaakIdentificatie(
         val type: String,
-        val value: String
+        val value: String,
     ) {
         companion object {
             const val TYPE_BSN = "bsn"
@@ -97,9 +99,11 @@ data class ExterneKlanttaakV1x1x0(
         PRODUCT("product"),
     }
 
-    enum class TaakReceiver(@JsonValue val key: String) {
+    enum class TaakReceiver(
+        @JsonValue val key: String,
+    ) {
         ZAAK_INITIATOR("zaakInitiator"),
-        OTHER("other")
+        OTHER("other"),
     }
 
     enum class TaakSoort(
@@ -113,7 +117,9 @@ data class ExterneKlanttaakV1x1x0(
         override fun toString(): String = value
     }
 
-    enum class TaakStatus(@JsonValue val value: String) {
+    enum class TaakStatus(
+        @JsonValue val value: String,
+    ) {
         OPEN("open"),
         AFGEROND("afgerond"),
         VERWERKT("verwerkt"),
