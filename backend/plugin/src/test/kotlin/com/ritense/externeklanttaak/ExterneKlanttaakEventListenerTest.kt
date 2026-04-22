@@ -91,6 +91,7 @@ class ExterneKlanttaakEventListenerTest {
                 kanaal = "objecten",
                 hoofdObject = null,
                 resourceUrl = objectUrl,
+                resource = null,
                 actie = "update",
                 aanmaakdatum = null,
                 kenmerken =

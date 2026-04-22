@@ -307,6 +307,7 @@ class ExterneKlanttaakPluginIT : BaseIntegrationTest() {
                 kanaal = "objecten",
                 hoofdObject = null,
                 resourceUrl = "${server.url("/")}objects/completed",
+                resource = null,
                 actie = "update",
                 aanmaakdatum = null,
                 kenmerken =
