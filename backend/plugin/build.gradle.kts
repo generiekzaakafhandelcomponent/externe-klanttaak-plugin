@@ -51,6 +51,24 @@ dependencies {
 
     compileOnly("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 
+    // Testing - compileOnly deps needed at test time
+    testImplementation("com.ritense.valtimo:catalogi-api")
+    testImplementation("com.ritense.valtimo:contract")
+    testImplementation("com.ritense.valtimo:core")
+    testImplementation("com.ritense.valtimo:case")
+    testImplementation("com.ritense.valtimo:documenten-api")
+    testImplementation("com.ritense.valtimo:outbox")
+    testImplementation("com.ritense.valtimo:object-management")
+    testImplementation("com.ritense.valtimo:objecten-api")
+    testImplementation("com.ritense.valtimo:objecttypen-api")
+    testImplementation("com.ritense.valtimo:openzaak-plugin-authentication")
+    testImplementation("com.ritense.valtimo:notificaties-api")
+    testImplementation("com.ritense.valtimo:plugin")
+    testImplementation("com.ritense.valtimo:process-document")
+    testImplementation("com.ritense.valtimo:value-resolver")
+    testImplementation("com.ritense.valtimo:zaken-api")
+    testImplementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
+
     // Testing
     testImplementation("com.ritense.valtimo:local-resource")
     testImplementation("com.ritense.valtimo:test-utils-common")
