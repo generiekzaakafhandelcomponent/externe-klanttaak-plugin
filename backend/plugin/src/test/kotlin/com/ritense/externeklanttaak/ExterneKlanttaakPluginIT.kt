@@ -572,7 +572,13 @@ class ExterneKlanttaakPluginIT : BaseIntegrationTest() {
                     val response =
                         when (path) {
                             "/kanaal" -> getKanaalResponse()
-                            "/abonnement" -> createAbonnementResponse()
+                            "/abonnement" -> {
+                                when (request.method) {
+                                    "GET" -> getAbonnementenResponse()
+                                    "POST" -> createAbonnementResponse()
+                                    else -> MockResponse().setResponseCode(405)
+                                }
+                            }
                             "/objects" -> createObjectResponse()
                             "/objects/completed" -> {
                                 when (request.method) {
@@ -608,6 +614,14 @@ class ExterneKlanttaakPluginIT : BaseIntegrationTest() {
                   "naam": "objecten"
                 }
             ]
+            """.trimIndent()
+        return mockJsonResponse(body)
+    }
+
+    private fun getAbonnementenResponse(): MockResponse {
+        val body =
+            """
+            []
             """.trimIndent()
         return mockJsonResponse(body)
     }

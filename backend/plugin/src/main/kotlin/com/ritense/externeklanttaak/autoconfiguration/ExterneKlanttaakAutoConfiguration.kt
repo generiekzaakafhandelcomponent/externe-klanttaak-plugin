@@ -29,7 +29,6 @@ import com.ritense.valtimo.contract.security.config.HttpSecurityConfigurer
 import com.ritense.valtimo.service.OperatonProcessService
 import com.ritense.valtimo.service.OperatonTaskService
 import com.ritense.valueresolver.ValueResolverService
-import com.ritense.zakenapi.link.ZaakInstanceLinkService
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
@@ -54,8 +53,6 @@ class ExterneKlanttaakAutoConfiguration {
         pluginService: PluginService,
         objectManagementService: ObjectManagementService,
         valueResolverService: ValueResolverService,
-        processDocumentService: ProcessDocumentService,
-        zaakInstanceLinkService: ZaakInstanceLinkService,
         taskService: OperatonTaskService,
     ): ExterneKlanttaakService =
         ExterneKlanttaakService(
