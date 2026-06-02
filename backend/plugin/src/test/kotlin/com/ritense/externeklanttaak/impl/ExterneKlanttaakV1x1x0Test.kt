@@ -49,7 +49,10 @@ import org.mockito.kotlin.whenever
 import org.operaton.bpm.engine.delegate.DelegateExecution
 import org.operaton.bpm.engine.delegate.DelegateTask
 import java.net.URI
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.Date
 import java.util.UUID
 import kotlin.test.Test
@@ -138,7 +141,13 @@ class ExterneKlanttaakV1x1x0Test {
         assertEquals(delegateTask.name, klanttaak.titel)
         assertEquals(TYPE_BSN, klanttaak.identificatie.type)
         assertEquals("999990755", klanttaak.identificatie.value)
-        assertEquals(LocalDateTime.parse("2024-10-28T23:00:00"), klanttaak.verloopdatum)
+        assertEquals(
+            LocalDateTime.ofInstant(
+                LocalDate.parse("2024-10-29").atStartOfDay(ZoneId.systemDefault()).toInstant(),
+                ZoneOffset.UTC,
+            ),
+            klanttaak.verloopdatum,
+        )
     }
 
     @Test

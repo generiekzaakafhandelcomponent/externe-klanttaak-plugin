@@ -65,7 +65,7 @@ export class CreateExterneKlanttaakV1x1x0FormComponent {
     }
 
     formValueChange(formValue: CreateExterneKlanttaakV1x1x0Config): void {
-        let valid =
+        const valid =
             !!formValue.taakSoort &&
             (!!(formValue.taakSoort === TaakSoort.URL && !!formValue.url) ||
                 !!(
