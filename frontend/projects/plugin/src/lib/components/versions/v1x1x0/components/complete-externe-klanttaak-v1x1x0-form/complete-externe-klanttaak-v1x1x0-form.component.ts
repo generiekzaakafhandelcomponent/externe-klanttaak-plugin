@@ -40,7 +40,7 @@ export class CompleteExterneKlanttaakV1x1x0FormComponent {
     }
 
     formValueChange(formValue: CompleteExterneKlanttaakV1x1x0Config): void {
-        let valid =
+        const valid =
             !!(!this.bewaarIngediendeGegevens?.checked || !!formValue.verzondenDataMapping) &&
             !!(!this.koppelDocumenten?.checked || !!formValue.documentPadenPad);
 

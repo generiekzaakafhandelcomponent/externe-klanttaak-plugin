@@ -1,12 +1,13 @@
 val kotlinLoggingVersion: String by project
 val nettyResolverDnsNativeMacOsVersion: String by project
+val valtimoVersion: String by project
 
 dependencies {
-    implementation(platform("com.ritense.valtimo:valtimo-dependency-versions"))
+    implementation(platform("com.ritense.valtimo:valtimo-dependency-versions:$valtimoVersion"))
 
-    implementation("com.ritense.valtimo:valtimo-dependencies")
-    implementation("com.ritense.valtimo:valtimo-gzac-dependencies")
-    implementation("com.ritense.valtimo:local-mail")
+    implementation("com.ritense.valtimo:valtimo-dependencies:$valtimoVersion")
+    implementation("com.ritense.valtimo:valtimo-gzac-dependencies:$valtimoVersion")
+    implementation("com.ritense.valtimo:local-mail:$valtimoVersion")
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.postgresql:postgresql")
