@@ -19,7 +19,7 @@ import {Toggle} from 'carbon-components-angular';
 import {CompleteExterneKlanttaakV1x1x0Config} from "../../models";
 
 @Component({
-  standalone: false,
+    standalone: false,
     selector: 'valtimo-complete-externe-klanttaak-v1x1x0-form',
     templateUrl: './complete-externe-klanttaak-v1x1x0-form.component.html',
     styleUrl: './complete-externe-klanttaak-v1x1x0-form.component.scss',
@@ -40,7 +40,7 @@ export class CompleteExterneKlanttaakV1x1x0FormComponent {
     }
 
     formValueChange(formValue: CompleteExterneKlanttaakV1x1x0Config): void {
-        const valid =
+        let valid =
             !!(!this.bewaarIngediendeGegevens?.checked || !!formValue.verzondenDataMapping) &&
             !!(!this.koppelDocumenten?.checked || !!formValue.documentPadenPad);
 

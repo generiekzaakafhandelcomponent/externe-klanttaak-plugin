@@ -23,7 +23,7 @@ import {CreateExterneKlanttaakV1x1x0Config, FormulierSoort, OtherReceiverSoort,
     ReceiverSource, TaakKoppelingRegistratie, TaakSoort} from "../../models";
 
 @Component({
-  standalone: false,
+    standalone: false,
     selector: 'valtimo-create-externe-klanttaak-v1x1x0-form',
     templateUrl: './create-externe-klanttaak-v1x1x0-form.component.html',
     styleUrl: './create-externe-klanttaak-v1x1x0-form.component.scss',
@@ -65,7 +65,7 @@ export class CreateExterneKlanttaakV1x1x0FormComponent {
     }
 
     formValueChange(formValue: CreateExterneKlanttaakV1x1x0Config): void {
-        const valid =
+        let valid =
             !!formValue.taakSoort &&
             (!!(formValue.taakSoort === TaakSoort.URL && !!formValue.url) ||
                 !!(

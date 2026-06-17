@@ -24,7 +24,7 @@ import {ObjectManagementService, ExterneKlanttaakVersionService} from '../../ser
 import {PluginConfigurationComponent, PluginManagementService, PluginTranslationService} from "@valtimo/plugin";
 
 @Component({
-  standalone: false,
+    standalone: false,
     selector: 'valtimo-externe-klanttaak-configuration',
     templateUrl: './externe-klanttaak-configuration.component.html',
     styleUrls: ['./externe-klanttaak-configuration.component.scss'],
