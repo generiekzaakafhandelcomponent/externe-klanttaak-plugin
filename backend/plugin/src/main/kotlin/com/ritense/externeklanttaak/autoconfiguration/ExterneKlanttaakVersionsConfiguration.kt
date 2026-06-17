@@ -29,7 +29,6 @@ import org.springframework.core.annotation.Order
 
 @AutoConfiguration
 class ExterneKlanttaakVersionsConfiguration {
-
     @Bean
     @Order(Ordered.LOWEST_PRECEDENCE)
     fun ensureUniqueExterneKlanttaakVersions(externeKlanttaakVersions: List<IExterneKlanttaakVersion>): Nothing? {
