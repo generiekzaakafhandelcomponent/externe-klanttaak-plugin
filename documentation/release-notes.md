@@ -3,22 +3,13 @@
 Overzicht van wijzigingen per versie van de Externe Klanttaak-plugin.
 
 ## 3.0.1
-Patch-release met kleine verbeteringen
+Plugin ondergebracht in een eigen repository met voorbeeldapplicatie en aparte documentatie, inclusief synchronisatie met de monorepo, build- en frontend-fixes en valtimo-configurator-metadata.
 
-## 3.0.0
-Ondergebracht in een eigen repository met voorbeeldapplicatie en aparte documentatie.
-
-## 2.0.2
-Ondersteuning voor het objecten-kanaal van de Notificaties-API toegevoegd en een onbedoeld meegeleverde proceslink verwijderd.
-
-## 2.0.1
-Geschikt gemaakt voor Valtimo 13.1.2.
-
-## 2.0.0
-Geschikt gemaakt voor Valtimo 13.
+## 1.0.2
+Geen foutmelding meer bij onbekende verwerker-taak-ID's: pogingen tot afhandeling van taken die niet bij de huidige gzac-instantie horen worden voortaan gelogd in plaats van een exception te veroorzaken.
 
 ## 1.0.1
-Geen foutmelding meer bij onbekende verwerker-taak-ID's.
+Correcties op de Externe Klantaak 1.1.x-specificatie: `koppeling.uuid` hernoemd naar `koppeling.value` en `verloopdatum` aangepast van `LocalDate` naar `LocalDateTime`.
 
 ## 1.0.0
 Eerste publieke release: externe klanttaken beheren via ZGW.
