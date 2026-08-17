@@ -1,7 +1,7 @@
 {
   "name": "@valtimo-plugins/externe-klanttaak",
   "license": "EUPL-1.2",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "scripts": {
     "build": "ng build @valtimo-plugins/externe-klanttaak",
     "watch": "ng build @valtimo-plugins/externe-klanttaak --watch"
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@angular/forms": "^19.2.8",
-    "ngx-spinner": "17.0.0",
+    "ngx-spinner": "19.0.0",
     "tslib": "2.8.1"
   }
 }

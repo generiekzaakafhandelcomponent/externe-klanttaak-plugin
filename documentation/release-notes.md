@@ -2,6 +2,10 @@
 
 Overzicht van wijzigingen per versie van de Externe Klanttaak-plugin.
 
+## 3.0.2
+
+Valtimo bijgewerkt naar versie 13.41.0.
+
 ## 3.0.1
 Patch-release met kleine verbeteringen
 
