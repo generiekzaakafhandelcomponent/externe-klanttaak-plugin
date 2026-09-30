@@ -1,7 +1,7 @@
 {
   "name": "@valtimo-plugins/externe-klanttaak",
   "license": "EUPL-1.2",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "scripts": {
     "build": "ng build @valtimo-plugins/externe-klanttaak",
     "watch": "ng build @valtimo-plugins/externe-klanttaak --watch"
