@@ -126,7 +126,8 @@ class ExterneKlanttaakPlugin(
                 naam = KANAAL_OBJECTEN,
                 filters =
                     mapOf(
-                        OBJECT_TYPE to "${objecttypenApiPlugin.url}objecttypes/${objectManagement.objecttypeId}",
+                        OBJECT_TYPE to
+                            objecttypenApiPlugin.getObjectTypeUrlById(objectManagement.objecttypeId).toString(),
                         ACTIE to UPDATE,
                     ),
             ),
