@@ -2,6 +2,12 @@
 
 Overzicht van wijzigingen per versie van de Externe Klanttaak-plugin.
 
+## 3.0.5
+
+Een ontbrekende of ongeldige Object management- of Objecttypen API-configuratie blokkeert niet langer de registratie van
+abonnementen op de Notificaties-API. Voorheen mislukte daardoor het hele abonnement, ook voor andere plugins. Nu wordt een foutmelding
+gelogd en worden alleen de kanaalfilters van de Externe Klanttaak-plugin overgeslagen.
+
 ## 3.0.4
 
 Abonnement op de Notificaties-API hersteld voor afgeronde externe klanttaken. Het `objectType`-filter in het abonnement
