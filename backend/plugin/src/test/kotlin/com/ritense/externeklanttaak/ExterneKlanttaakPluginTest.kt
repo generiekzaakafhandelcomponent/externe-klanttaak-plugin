@@ -27,7 +27,12 @@ import com.ritense.externeklanttaak.version.v1x1x0.CreateExterneKlanttaakActionV
 import com.ritense.externeklanttaak.version.v1x1x0.ExterneKlanttaakV1x1x0.TaakReceiver.OTHER
 import com.ritense.externeklanttaak.version.v1x1x0.ExterneKlanttaakV1x1x0.TaakSoort.URL
 import com.ritense.externeklanttaak.version.v1x1x0.ExterneKlanttaakVersionV1x1x0
+import com.ritense.notificatiesapi.domain.Abonnement
+import com.ritense.objectmanagement.domain.ObjectManagement
 import com.ritense.objectmanagement.service.ObjectManagementService
+import com.ritense.objecttypenapi.ObjecttypenApiPlugin
+import com.ritense.objecttypenapi.client.ObjecttypenApiClient
+import com.ritense.plugin.domain.PluginConfigurationId
 import com.ritense.plugin.service.PluginService
 import com.ritense.processdocument.service.ProcessDocumentService
 import com.ritense.valtimo.contract.json.MapperSingleton
@@ -38,14 +43,18 @@ import com.ritense.zakenapi.ZakenApiPlugin
 import com.ritense.zakenapi.link.ZaakInstanceLinkService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.operaton.bpm.engine.delegate.DelegateTask
+import java.net.URI
 import java.util.UUID
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 internal class ExterneKlanttaakPluginTest {
     private lateinit var objectManagementService: ObjectManagementService
@@ -129,6 +138,41 @@ internal class ExterneKlanttaakPluginTest {
 
         // then
         verify(externeKlanttaakService, times(1)).createExterneKlanttaak(any(), any(), any(), any())
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["https://objecttypen.example.com/api/v2", "https://objecttypen.example.com/api/v2/"])
+    fun `should build kanaal filter with object type url matching the created object`(objecttypenApiUrl: String) {
+        // given
+        val objectManagementId = UUID.randomUUID()
+        val objecttypenApiPluginConfigurationId = UUID.randomUUID()
+        val objectManagement = mock<ObjectManagement>()
+        whenever(objectManagement.objecttypenApiPluginConfigurationId).thenReturn(objecttypenApiPluginConfigurationId)
+        whenever(objectManagement.objecttypeId).thenReturn("3e852115-277a-4570-873a-9a64be3aeb34")
+        whenever(objectManagementService.getById(objectManagementId)).thenReturn(objectManagement)
+        val objecttypenApiPlugin = ObjecttypenApiPlugin(mock<ObjecttypenApiClient>())
+        objecttypenApiPlugin.url = URI(objecttypenApiUrl)
+        whenever(pluginService.createInstance(any<PluginConfigurationId>())).thenReturn(objecttypenApiPlugin)
+        externeKlanttaakPlugin.objectManagementConfigurationId = objectManagementId
+
+        // when
+        val kanalen = externeKlanttaakPlugin.getKanaalFilters()
+
+        // then
+        assertEquals(
+            listOf(
+                Abonnement.Kanaal(
+                    naam = "objecten",
+                    filters =
+                        mapOf(
+                            "objectType" to
+                                "https://objecttypen.example.com/api/v2/objecttypes/3e852115-277a-4570-873a-9a64be3aeb34",
+                            "actie" to "update",
+                        ),
+                ),
+            ),
+            kanalen,
+        )
     }
 
     companion object {

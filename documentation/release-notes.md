@@ -2,6 +2,12 @@
 
 Overzicht van wijzigingen per versie van de Externe Klanttaak-plugin.
 
+## 3.0.4
+
+Abonnement op de Notificaties-API hersteld voor afgeronde externe klanttaken. Het `objectType`-filter in het abonnement
+kwam niet overeen met het objecttype van de aangemaakte klanttaak als de URL van de Objecttypen API-plugin niet eindigde
+op een `/`. Daardoor werden afgeronde klanttaken niet verwerkt.
+
 ## 3.0.3
 
 Ondersteuning voor Valtimo 13.48.0.
