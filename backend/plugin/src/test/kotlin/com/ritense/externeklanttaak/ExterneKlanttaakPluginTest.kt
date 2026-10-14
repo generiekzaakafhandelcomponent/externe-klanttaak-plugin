@@ -41,6 +41,7 @@ import com.ritense.valueresolver.ValueResolverService
 import com.ritense.zakenapi.ZaakUrlProvider
 import com.ritense.zakenapi.ZakenApiPlugin
 import com.ritense.zakenapi.link.ZaakInstanceLinkService
+import jakarta.persistence.EntityNotFoundException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -173,6 +174,58 @@ internal class ExterneKlanttaakPluginTest {
             ),
             kanalen,
         )
+    }
+
+    @Test
+    fun `should return no kanaal filters when object management is not found`() {
+        // given
+        val objectManagementId = UUID.randomUUID()
+        whenever(objectManagementService.getById(objectManagementId)).thenReturn(null)
+        externeKlanttaakPlugin.objectManagementConfigurationId = objectManagementId
+
+        // when
+        val kanalen = externeKlanttaakPlugin.getKanaalFilters()
+
+        // then
+        assertEquals(emptyList(), kanalen)
+    }
+
+    @Test
+    fun `should return no kanaal filters when objecttypen api plugin cannot be created`() {
+        // given
+        val objectManagementId = givenObjectManagement()
+        whenever(pluginService.createInstance(any<PluginConfigurationId>()))
+            .thenThrow(EntityNotFoundException("Plugin configuration not found"))
+        externeKlanttaakPlugin.objectManagementConfigurationId = objectManagementId
+
+        // when
+        val kanalen = externeKlanttaakPlugin.getKanaalFilters()
+
+        // then
+        assertEquals(emptyList(), kanalen)
+    }
+
+    @Test
+    fun `should return no kanaal filters when plugin configuration is not an objecttypen api plugin`() {
+        // given
+        val objectManagementId = givenObjectManagement()
+        whenever(pluginService.createInstance(any<PluginConfigurationId>())).thenReturn(zakenApiPlugin)
+        externeKlanttaakPlugin.objectManagementConfigurationId = objectManagementId
+
+        // when
+        val kanalen = externeKlanttaakPlugin.getKanaalFilters()
+
+        // then
+        assertEquals(emptyList(), kanalen)
+    }
+
+    private fun givenObjectManagement(): UUID {
+        val objectManagementId = UUID.randomUUID()
+        val objectManagement = mock<ObjectManagement>()
+        whenever(objectManagement.objecttypenApiPluginConfigurationId).thenReturn(UUID.randomUUID())
+        whenever(objectManagement.objecttypeId).thenReturn("3e852115-277a-4570-873a-9a64be3aeb34")
+        whenever(objectManagementService.getById(objectManagementId)).thenReturn(objectManagement)
+        return objectManagementId
     }
 
     companion object {

@@ -34,9 +34,9 @@ import com.ritense.plugin.service.PluginService
 import com.ritense.processlink.domain.ActivityTypeWithEventName
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.oshai.kotlinlogging.withLoggingContext
+import java.util.UUID
 import org.operaton.bpm.engine.delegate.DelegateExecution
 import org.operaton.bpm.engine.delegate.DelegateTask
-import java.util.UUID
 
 @Plugin(
     key = "externe-klanttaak",
@@ -112,22 +112,30 @@ class ExterneKlanttaakPlugin(
     override fun getNotificatiesApiPlugin(): NotificatiesApiPlugin = notificatiesApiPluginConfiguration
 
     override fun getKanaalFilters(): List<Abonnement.Kanaal> {
-        val objectManagement =
-            objectManagementService.getById(objectManagementConfigurationId)
-                ?: throw IllegalStateException("Object management not found for externe klanttaak")
+        val objectManagement = objectManagementService.getById(objectManagementConfigurationId) ?: run {
+            logger.error { "Object management configuration [$objectManagementConfigurationId] not found for externe klanttaak plugin" }
+            return emptyList()
+        }
 
-        val objecttypenApiPlugin =
-            pluginService.createInstance(
+        val objectTypeUrl = try {
+            val objecttypenApiPlugin = pluginService.createInstance(
                 PluginConfigurationId.existingId(objectManagement.objecttypenApiPluginConfigurationId),
             ) as ObjecttypenApiPlugin
+            objecttypenApiPlugin.getObjectTypeUrlById(objectManagement.objecttypeId).toString()
+        } catch (e: Exception) {
+            logger.error(e) {
+                "Could not determine object type URL for object management configuration " +
+                        "[$objectManagementConfigurationId] of externe klanttaak plugin"
+            }
+            return emptyList()
+        }
 
         return listOf(
             Abonnement.Kanaal(
                 naam = KANAAL_OBJECTEN,
                 filters =
                     mapOf(
-                        OBJECT_TYPE to
-                            objecttypenApiPlugin.getObjectTypeUrlById(objectManagement.objecttypeId).toString(),
+                        OBJECT_TYPE to objectTypeUrl,
                         ACTIE to UPDATE,
                     ),
             ),
@@ -140,10 +148,12 @@ class ExterneKlanttaakPlugin(
             matchedVersions.singleOrNull(),
         ) {
             "Could not get Externe Klanttaak Version. " +
-                "Expected exactly 1 ExterneKlanttaakVersion bean to match the configured version " +
-                "[$pluginVersion], but found ${matchedVersions.joinToString {
-                    it.javaClass.simpleName
-                }}]"
+                    "Expected exactly 1 ExterneKlanttaakVersion bean to match the configured version " +
+                    "[$pluginVersion], but found ${
+                        matchedVersions.joinToString {
+                            it.javaClass.simpleName
+                        }
+                    }]"
         }
     }
 
